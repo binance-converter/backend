@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"errors"
 	"github.com/binance-converter/backend-api/api/exchange_plot"
 	"github.com/binance-converter/backend/core"
 	timeInterval "github.com/go-follow/time-interval"
@@ -12,10 +11,6 @@ import (
 	"google.golang.org/grpc/status"
 	"image"
 	"image/png"
-)
-
-var (
-	ErrorExchangePlotHandlerInputArgIsNull = errors.New("error input arg is null")
 )
 
 type exchangePlotService interface {
@@ -78,7 +73,7 @@ func convertProtoTimeIntervalToCore(protoTimeInterval *exchange_plot.TimeInterva
 func convertProtoPlotParamsToCore(protoPlotParams *exchange_plot.PlotParams) (core.PlotParams,
 	error) {
 	if protoPlotParams == nil {
-		return core.PlotParams{}, ErrorExchangePlotHandlerInputArgIsNull
+		return core.PlotParams{}, core.ErrorExchangePlotEmptyInputArg
 	}
 
 	coreConverterPair, err := convertProtoConverterPairToCore(protoPlotParams.Pair)
