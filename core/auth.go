@@ -11,5 +11,6 @@ type ServiceSignUpUserByTelegramData struct {
 }
 
 var (
-	ErrorServiceAuthUserAlreadyExists = errors.New("error user already exists")
+	ErrorAuthServiceAuthUserAlreadyExists = errors.New("error user already exists")
+	ErrorAuthInternalError                = errors.New("internal error")
 )
