@@ -37,7 +37,8 @@ func (c *CurrenciesHandler) GetAvailableCurrencies(ctx context.Context,
 	if err != nil {
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyCode:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				currencies.AdditionalErrorCode_INVALID_CURRENCY_CODE), err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -49,11 +50,17 @@ func (c *CurrenciesHandler) GetAvailableCurrencies(ctx context.Context,
 func (c *CurrenciesHandler) GetAvailableBankByCurrency(ctx context.Context,
 	code *currencies.CurrencyCode) (*currencies.BankNames, error) {
 
-	banks, err := c.service.GetAvailableBankByCurrency(ctx, convertProtoCurrencyCodeToCore(code))
+	coreCode, err := convertProtoCurrencyCodeToCore(code)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	banks, err := c.service.GetAvailableBankByCurrency(ctx, coreCode)
 	if err != nil {
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyCode:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				currencies.AdditionalErrorCode_INVALID_CURRENCY_CODE), err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -73,11 +80,14 @@ func (c *CurrenciesHandler) SetCurrency(ctx context.Context,
 	if err != nil {
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyType:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				currencies.AdditionalErrorCode_INVALID_CURRENCY_TYPE), err.Error())
 		case core.ErrorCurrencyInvalidCurrencyCode:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				currencies.AdditionalErrorCode_INVALID_CURRENCY_CODE), err.Error())
 		case core.ErrorCurrencyInvalidBankCode:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(currencies.AdditionalErrorCode_INVALID_BANK_CODE),
+				err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -97,7 +107,8 @@ func (c *CurrenciesHandler) GetMyCurrencies(ctx context.Context,
 	if err != nil {
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyType:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				currencies.AdditionalErrorCode_INVALID_CURRENCY_TYPE), err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -123,11 +134,14 @@ func (c *CurrenciesHandler) DeleteCurrency(ctx context.Context,
 	if err != nil {
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyType:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				currencies.AdditionalErrorCode_INVALID_CURRENCY_TYPE), err.Error())
 		case core.ErrorCurrencyInvalidCurrencyCode:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				currencies.AdditionalErrorCode_INVALID_CURRENCY_CODE), err.Error())
 		case core.ErrorCurrencyInvalidBankCode:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(currencies.AdditionalErrorCode_INVALID_BANK_CODE),
+				err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -141,13 +155,16 @@ func (c *CurrenciesHandler) DeleteCurrency(ctx context.Context,
 
 func convertProtoCurrencyTypeToCore(currencyType *currencies.CurrencyType) (core.CurrencyType,
 	error) {
+	if currencyType == nil {
+		return core.CurrencyType(0), core.ErrorCurrencyEmptyInputArg
+	}
 	switch currencyType.Type {
 	case currencies.ECurrencyType_CRYPTO:
 		return core.CurrencyTypeCrypto, nil
 	case currencies.ECurrencyType_CLASSIC:
 		return core.ECurrencyTypeClassic, nil
 	}
-	return 0, errors.New("error parsing currency type")
+	return 0, core.ErrorCurrencyInvalidCurrencyType
 }
 
 func convertCoreCurrencyTypeToProto(currencyType core.CurrencyType) (*currencies.CurrencyType,
@@ -166,9 +183,12 @@ func convertCoreCurrencyTypeToProto(currencyType core.CurrencyType) (*currencies
 }
 
 func convertProtoCurrencyCodeToCore(protoCurrencyCode *currencies.CurrencyCode) (
-	currencyCode core.CurrencyCode) {
-	currencyCode = core.CurrencyCode(protoCurrencyCode.CurrencyCode)
-	return currencyCode
+	core.CurrencyCode, error) {
+	if protoCurrencyCode == nil {
+		return "", core.ErrorCurrencyEmptyInputArg
+	}
+	currencyCode := core.CurrencyCode(protoCurrencyCode.CurrencyCode)
+	return currencyCode, nil
 }
 
 func convertCoreCurrencyCodeToProto(coreCurrencyCode core.CurrencyCode) (
@@ -193,8 +213,11 @@ func convertCoreCurrencyBankToProto(coreCurrencyBank core.CurrencyBank) (Currenc
 }
 
 func convertProtoCurrencyBankToCore(protoCurrencyBank *currencies.
-	BankName) core.CurrencyBank {
-	return core.CurrencyBank(protoCurrencyBank.BankName)
+	BankName) (core.CurrencyBank, error) {
+	if protoCurrencyBank == nil {
+		return "", core.ErrorCurrencyEmptyInputArg
+	}
+	return core.CurrencyBank(protoCurrencyBank.BankName), nil
 }
 
 func convertCoreCurrencyBanksToProto(coreCurrencyBanks []core.CurrencyBank) (
@@ -209,15 +232,30 @@ func convertCoreCurrencyBanksToProto(coreCurrencyBanks []core.CurrencyBank) (
 
 func convertProtoFullCurrencyToCore(protoCurrency *currencies.FullCurrency) (core.
 	FullCurrency, error) {
+
+	if protoCurrency == nil {
+		return core.FullCurrency{}, core.ErrorCurrencyEmptyInputArg
+	}
+
 	coreCurrencyType, err := convertProtoCurrencyTypeToCore(protoCurrency.Type)
+	if err != nil {
+		return core.FullCurrency{}, err
+	}
+
+	currencyCode, err := convertProtoCurrencyCodeToCore(protoCurrency.CurrencyCode)
+	if err != nil {
+		return core.FullCurrency{}, err
+	}
+
+	bankCode, err := convertProtoCurrencyBankToCore(protoCurrency.BankName)
 	if err != nil {
 		return core.FullCurrency{}, err
 	}
 
 	return core.FullCurrency{
 		CurrencyType: coreCurrencyType,
-		CurrencyCode: convertProtoCurrencyCodeToCore(protoCurrency.CurrencyCode),
-		BankCode:     convertProtoCurrencyBankToCore(protoCurrency.BankName),
+		CurrencyCode: currencyCode,
+		BankCode:     bankCode,
 	}, nil
 }
 

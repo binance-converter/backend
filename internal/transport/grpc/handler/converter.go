@@ -57,7 +57,8 @@ func (c ConverterHandler) SetConvertPair(ctx context.Context,
 	if err != nil {
 		switch err {
 		case core.ErrorConverterInvalidConverterPair:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				converter.AdditionalErrorCode_INVALID_CONVERTER_PAIR), err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -95,7 +96,8 @@ func (c ConverterHandler) SetThresholdConvertPairs(ctx context.Context,
 	if err != nil {
 		switch err {
 		case core.ErrorConverterInvalidConverterPair:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				converter.AdditionalErrorCode_INVALID_CONVERTER_PAIR), err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -130,7 +132,8 @@ func (c ConverterHandler) GetCurrentExchange(ctx context.Context,
 	if err != nil {
 		switch err {
 		case core.ErrorConverterInvalidConverterPair:
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.Code(
+				converter.AdditionalErrorCode_INVALID_CONVERTER_PAIR), err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -141,7 +144,6 @@ func (c ConverterHandler) GetCurrentExchange(ctx context.Context,
 func convertCoreConverterPairToProto(corePair core.ConverterPair) (*converter.ConverterPair,
 	error) {
 	pair := &converter.ConverterPair{}
-
 	for _, currency := range corePair.Currencies {
 		protoCurrency, err := convertCoreFullCurrencyToProto(currency)
 		if err != nil {
@@ -168,6 +170,9 @@ func convertCoreConverterPairsToProto(corePairs []core.ConverterPair) (*converte
 
 func convertProtoConverterPairToCore(protoConverterPair *converter.ConverterPair) (core.
 	ConverterPair, error) {
+	if protoConverterPair == nil {
+		return core.ConverterPair{}, core.ErrorConverterEmptyInputArg
+	}
 	coreConverterPair := core.ConverterPair{}
 	for _, protoCurrency := range protoConverterPair.ConverterPair {
 		coreCurrency, err := convertProtoFullCurrencyToCore(protoCurrency)
@@ -211,17 +216,24 @@ func convertCoreThresholdConverterPairsToProto(coreThreshold []core.ThresholdCon
 	return threshold, nil
 }
 
-func convertProtoExchangeToCore(protoExchange *converter.Exchange) core.Exchange {
-	return core.Exchange(protoExchange.Exchange)
+func convertProtoExchangeToCore(protoExchange *converter.Exchange) (core.Exchange, error) {
+	if protoExchange == nil {
+		return core.Exchange(0), core.ErrorConverterEmptyInputArg
+	}
+	return core.Exchange(protoExchange.Exchange), nil
 }
 
 func convertProtoThresholdConverterPair(protoThreshold *converter.ThresholdConvertPair) (core.
 	ThresholdConvertPair, error) {
-	coreThreshold := core.ThresholdConvertPair{
-		Exchange: convertProtoExchangeToCore(protoThreshold.Exchange),
-	}
+	coreThreshold := core.ThresholdConvertPair{}
 
 	var err error
+
+	coreThreshold.Exchange, err = convertProtoExchangeToCore(protoThreshold.Exchange)
+	if err != nil {
+		return coreThreshold, err
+	}
+
 	coreThreshold.ConverterPair, err = convertProtoConverterPairToCore(protoThreshold.
 		ConverterPair)
 
