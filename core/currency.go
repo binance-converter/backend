@@ -12,13 +12,6 @@ const (
 type CurrencyCode string
 type CurrencyBank string
 
-var (
-	ErrorInvalidCurrencyType = errors.New("invalid currency type")
-	ErrorInvalidCurrencyCode = errors.New("invalid currency code")
-	ErrorInvalidBankCode     = errors.New("invalid bank code")
-	ErrorInternal            = errors.New("internal error")
-)
-
 type FullCurrency struct {
 	CurrencyType CurrencyType
 	CurrencyCode CurrencyCode
