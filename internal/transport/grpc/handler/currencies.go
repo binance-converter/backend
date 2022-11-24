@@ -36,7 +36,7 @@ func (c *CurrenciesHandler) GetAvailableCurrencies(ctx context.Context,
 	coreCurrencies, err := c.service.GetAvailableCurrencies(ctx, coreCurrencyCode)
 	if err != nil {
 		switch err {
-		case core.ErrorInvalidCurrencyCode:
+		case core.ErrorCurrencyInvalidCurrencyCode:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
@@ -52,7 +52,7 @@ func (c *CurrenciesHandler) GetAvailableBankByCurrency(ctx context.Context,
 	banks, err := c.service.GetAvailableBankByCurrency(ctx, convertProtoCurrencyCodeToCore(code))
 	if err != nil {
 		switch err {
-		case core.ErrorInvalidCurrencyCode:
+		case core.ErrorCurrencyInvalidCurrencyCode:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
@@ -72,11 +72,11 @@ func (c *CurrenciesHandler) SetCurrency(ctx context.Context,
 
 	if err != nil {
 		switch err {
-		case core.ErrorInvalidCurrencyType:
+		case core.ErrorCurrencyInvalidCurrencyType:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
-		case core.ErrorInvalidCurrencyCode:
+		case core.ErrorCurrencyInvalidCurrencyCode:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
-		case core.ErrorInvalidBankCode:
+		case core.ErrorCurrencyInvalidBankCode:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
@@ -96,7 +96,7 @@ func (c *CurrenciesHandler) GetMyCurrencies(ctx context.Context,
 
 	if err != nil {
 		switch err {
-		case core.ErrorInvalidCurrencyType:
+		case core.ErrorCurrencyInvalidCurrencyType:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
@@ -122,11 +122,11 @@ func (c *CurrenciesHandler) DeleteCurrency(ctx context.Context,
 	err = c.service.DeleteCurrency(ctx, coreCurrency)
 	if err != nil {
 		switch err {
-		case core.ErrorInvalidCurrencyType:
+		case core.ErrorCurrencyInvalidCurrencyType:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
-		case core.ErrorInvalidCurrencyCode:
+		case core.ErrorCurrencyInvalidCurrencyCode:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
-		case core.ErrorInvalidBankCode:
+		case core.ErrorCurrencyInvalidBankCode:
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())

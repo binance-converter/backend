@@ -36,7 +36,7 @@ func (a *AuthHandler) SignUpUserByTelegram(ctx context.Context,
 
 	if err != nil {
 		switch err {
-		case core.ErrorServiceAuthUserAlreadyExists:
+		case core.ErrorAuthServiceAuthUserAlreadyExists:
 			return nil, status.Error(codes.AlreadyExists, "fuck you")
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
