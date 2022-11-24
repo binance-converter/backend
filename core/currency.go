@@ -19,6 +19,7 @@ type FullCurrency struct {
 }
 
 var (
+	ErrorCurrencyEmptyInputArg       = errors.New("empty input arguments")
 	ErrorCurrencyInvalidCurrencyType = errors.New("invalid currency type")
 	ErrorCurrencyInvalidCurrencyCode = errors.New("invalid currency code")
 	ErrorCurrencyInvalidBankCode     = errors.New("invalid bank code")
