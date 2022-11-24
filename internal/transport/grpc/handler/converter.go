@@ -23,8 +23,8 @@ type ConverterHandler struct {
 	service ConverterService
 }
 
-func NewConverterService() *ConverterHandler {
-	return &ConverterHandler{}
+func NewConverterHandler(service ConverterService) *ConverterHandler {
+	return &ConverterHandler{service: service}
 }
 
 func (c ConverterHandler) GetAvailableConverterPairs(ctx context.Context,

@@ -26,6 +26,10 @@ type CurrenciesHandler struct {
 	service currenciesService
 }
 
+func NewCurrenciesHandler(service currenciesService) *CurrenciesHandler {
+	return &CurrenciesHandler{service: service}
+}
+
 func (c *CurrenciesHandler) GetAvailableCurrencies(ctx context.Context,
 	currencyType *currencies.CurrencyType) (*currencies.CurrencyCodes, error) {
 	coreCurrencyCode, err := convertProtoCurrencyTypeToCore(currencyType)

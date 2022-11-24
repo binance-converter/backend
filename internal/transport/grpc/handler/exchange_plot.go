@@ -22,8 +22,8 @@ type ExchangePlotHandler struct {
 	service exchangePlotService
 }
 
-func NewExchangePlotService() *ExchangePlotHandler {
-	return &ExchangePlotHandler{}
+func NewExchangePlotHandler(service exchangePlotService) *ExchangePlotHandler {
+	return &ExchangePlotHandler{service: service}
 }
 
 func (e *ExchangePlotHandler) GetExchangePlot(ctx context.Context,

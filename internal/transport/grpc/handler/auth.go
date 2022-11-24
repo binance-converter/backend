@@ -19,7 +19,7 @@ type AuthHandler struct {
 	auth.UnimplementedAuthServer
 }
 
-func NewAuthService(service AuthService) *AuthHandler {
+func NewAuthHandler(service AuthService) *AuthHandler {
 	return &AuthHandler{service: service}
 }
 
