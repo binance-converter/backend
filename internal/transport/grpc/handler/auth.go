@@ -10,7 +10,7 @@ import (
 )
 
 type AuthService interface {
-	SignUpUserByTelegram(ctx context.Context, data *core.ServiceSignUpUserByTelegramData) error
+	SignUpUserByTelegram(ctx context.Context, data core.ServiceSignUpUserByTelegramData) error
 }
 
 type AuthHandler struct {
@@ -26,14 +26,12 @@ func NewAuthService(service AuthService) *AuthHandler {
 func (a *AuthHandler) SignUpUserByTelegram(ctx context.Context,
 	request *auth.SignUpUserByTelegramRequest) (*emptypb.Empty, error) {
 
-	err := a.service.SignUpUserByTelegram(ctx, &core.ServiceSignUpUserByTelegramData{
-		ChatId:       request.ChatId,
-		UserName:     request.UserName,
-		FirstName:    request.FirstName,
-		LastName:     request.LastName,
-		LanguageCode: request.LanguageCode,
-	})
+	coreRequest, err := convertProtoSignUpUserByTelegramToCore(request)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
+	err = a.service.SignUpUserByTelegram(ctx, coreRequest)
 	if err != nil {
 		switch err {
 		case core.ErrorAuthServiceAuthUserAlreadyExists:
@@ -44,4 +42,18 @@ func (a *AuthHandler) SignUpUserByTelegram(ctx context.Context,
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func convertProtoSignUpUserByTelegramToCore(protoRequest *auth.SignUpUserByTelegramRequest) (
+	core.ServiceSignUpUserByTelegramData, error) {
+	if protoRequest == nil {
+		return core.ServiceSignUpUserByTelegramData{}, core.ErrorAuthServiceEmptyInputArg
+	}
+	return core.ServiceSignUpUserByTelegramData{
+		ChatId:       protoRequest.ChatId,
+		UserName:     protoRequest.UserName,
+		FirstName:    protoRequest.FirstName,
+		LastName:     protoRequest.LastName,
+		LanguageCode: protoRequest.LanguageCode,
+	}, nil
 }
