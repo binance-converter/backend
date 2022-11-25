@@ -166,7 +166,7 @@ func convertProtoCurrencyTypeToCore(currencyType *currencies.CurrencyType) (core
 	case currencies.ECurrencyType_CRYPTO:
 		return core.CurrencyTypeCrypto, nil
 	case currencies.ECurrencyType_CLASSIC:
-		return core.ECurrencyTypeClassic, nil
+		return core.CurrencyTypeClassic, nil
 	}
 	return 0, core.ErrorCurrencyInvalidCurrencyType
 }
@@ -178,7 +178,7 @@ func convertCoreCurrencyTypeToProto(currencyType core.CurrencyType) (*currencies
 		return &currencies.CurrencyType{
 			Type: currencies.ECurrencyType_CRYPTO,
 		}, nil
-	case core.ECurrencyTypeClassic:
+	case core.CurrencyTypeClassic:
 		return &currencies.CurrencyType{
 			Type: currencies.ECurrencyType_CLASSIC,
 		}, nil

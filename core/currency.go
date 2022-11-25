@@ -5,8 +5,8 @@ import "errors"
 type CurrencyType int32
 
 const (
-	CurrencyTypeCrypto   CurrencyType = 0
-	ECurrencyTypeClassic CurrencyType = 1
+	CurrencyTypeCrypto  CurrencyType = 0
+	CurrencyTypeClassic CurrencyType = 1
 )
 
 type CurrencyCode string
