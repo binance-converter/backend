@@ -18,7 +18,7 @@ type currenciesService interface {
 	SetCurrency(ctx context.Context, currency core.FullCurrency) error
 	GetMyCurrencies(ctx context.Context, currencyType *core.CurrencyType) ([]core.FullCurrency,
 		error)
-	DeleteCurrency(ctx context.Context, currencyType core.FullCurrency) error
+	DeleteCurrency(ctx context.Context, currencyType core.CurrencyCode) error
 }
 
 type CurrenciesHandler struct {
