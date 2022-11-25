@@ -2,6 +2,14 @@ package core
 
 import "errors"
 
+type AddUser struct {
+	ChatId       *int64
+	UserName     *string
+	FirstName    *string
+	LastName     *string
+	LanguageCode *string
+}
+
 type ServiceSignUpUserByTelegramData struct {
 	ChatId       int64
 	UserName     string
