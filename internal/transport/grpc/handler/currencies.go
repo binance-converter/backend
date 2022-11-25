@@ -16,9 +16,9 @@ type currenciesService interface {
 	GetAvailableBankByCurrency(ctx context.Context, currencyCode core.CurrencyCode) ([]core.
 		CurrencyBank, error)
 	SetCurrency(ctx context.Context, currency core.FullCurrency) error
-	GetMyCurrencies(ctx context.Context, currencyType core.CurrencyType) ([]core.FullCurrency,
+	GetMyCurrencies(ctx context.Context, currencyType *core.CurrencyType) ([]core.FullCurrency,
 		error)
-	DeleteCurrency(ctx context.Context, currencyType core.FullCurrency) error
+	DeleteCurrency(ctx context.Context, currencyType core.CurrencyCode) error
 }
 
 type CurrenciesHandler struct {
@@ -101,9 +101,12 @@ func (c *CurrenciesHandler) SetCurrency(ctx context.Context,
 
 func (c *CurrenciesHandler) GetMyCurrencies(ctx context.Context,
 	currencyType *currencies.CurrencyType) (*currencies.FullCurrencies, error) {
-	coreCurrencyType, err := convertProtoCurrencyTypeToCore(currencyType)
+
+	coreCurrencyType := new(core.CurrencyType)
+	var err error
+	*coreCurrencyType, err = convertProtoCurrencyTypeToCore(currencyType)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		coreCurrencyType = nil
 	}
 
 	coreCurrencies, err := c.service.GetMyCurrencies(ctx, coreCurrencyType)
@@ -127,9 +130,9 @@ func (c *CurrenciesHandler) GetMyCurrencies(ctx context.Context,
 }
 
 func (c *CurrenciesHandler) DeleteCurrency(ctx context.Context,
-	currency *currencies.FullCurrency) (*emptypb.Empty, error) {
+	currency *currencies.CurrencyCode) (*emptypb.Empty, error) {
 
-	coreCurrency, err := convertProtoFullCurrencyToCore(currency)
+	coreCurrency, err := convertProtoCurrencyCodeToCore(currency)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -166,7 +169,7 @@ func convertProtoCurrencyTypeToCore(currencyType *currencies.CurrencyType) (core
 	case currencies.ECurrencyType_CRYPTO:
 		return core.CurrencyTypeCrypto, nil
 	case currencies.ECurrencyType_CLASSIC:
-		return core.ECurrencyTypeClassic, nil
+		return core.CurrencyTypeClassic, nil
 	}
 	return 0, core.ErrorCurrencyInvalidCurrencyType
 }
@@ -178,7 +181,7 @@ func convertCoreCurrencyTypeToProto(currencyType core.CurrencyType) (*currencies
 		return &currencies.CurrencyType{
 			Type: currencies.ECurrencyType_CRYPTO,
 		}, nil
-	case core.ECurrencyTypeClassic:
+	case core.CurrencyTypeClassic:
 		return &currencies.CurrencyType{
 			Type: currencies.ECurrencyType_CLASSIC,
 		}, nil
