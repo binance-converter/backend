@@ -101,9 +101,12 @@ func (c *CurrenciesHandler) SetCurrency(ctx context.Context,
 
 func (c *CurrenciesHandler) GetMyCurrencies(ctx context.Context,
 	currencyType *currencies.CurrencyType) (*currencies.FullCurrencies, error) {
-	coreCurrencyType, err := convertProtoCurrencyTypeToCore(currencyType)
+
+	coreCurrencyType := new(core.CurrencyType)
+	var err error
+	*coreCurrencyType, err = convertProtoCurrencyTypeToCore(currencyType)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		coreCurrencyType = nil
 	}
 
 	coreCurrencies, err := c.service.GetMyCurrencies(ctx, coreCurrencyType)
@@ -127,9 +130,9 @@ func (c *CurrenciesHandler) GetMyCurrencies(ctx context.Context,
 }
 
 func (c *CurrenciesHandler) DeleteCurrency(ctx context.Context,
-	currency *currencies.FullCurrency) (*emptypb.Empty, error) {
+	currency *currencies.CurrencyCode) (*emptypb.Empty, error) {
 
-	coreCurrency, err := convertProtoFullCurrencyToCore(currency)
+	coreCurrency, err := convertProtoCurrencyCodeToCore(currency)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
