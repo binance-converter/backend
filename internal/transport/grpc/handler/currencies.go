@@ -16,7 +16,7 @@ type currenciesService interface {
 	GetAvailableBankByCurrency(ctx context.Context, currencyCode core.CurrencyCode) ([]core.
 		CurrencyBank, error)
 	SetCurrency(ctx context.Context, currency core.FullCurrency) error
-	GetMyCurrencies(ctx context.Context, currencyType core.CurrencyType) ([]core.FullCurrency,
+	GetMyCurrencies(ctx context.Context, currencyType *core.CurrencyType) ([]core.FullCurrency,
 		error)
 	DeleteCurrency(ctx context.Context, currencyType core.FullCurrency) error
 }
