@@ -33,6 +33,8 @@ func (c ConverterHandler) GetAvailableConverterPairs(ctx context.Context,
 	pairs, err := c.service.GetAvailableConverterPairs(ctx)
 	if err != nil {
 		switch err {
+		case core.ErrorConverterNotAuthorized:
+			return nil, status.Error(codes.PermissionDenied, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -56,6 +58,8 @@ func (c ConverterHandler) SetConvertPair(ctx context.Context,
 	err = c.service.SetConvertPair(ctx, corePair)
 	if err != nil {
 		switch err {
+		case core.ErrorConverterNotAuthorized:
+			return nil, status.Error(codes.PermissionDenied, err.Error())
 		case core.ErrorConverterInvalidConverterPair:
 			return nil, status.Error(codes.Code(
 				converter.AdditionalErrorCode_INVALID_CONVERTER_PAIR), err.Error())
@@ -73,6 +77,8 @@ func (c ConverterHandler) GetMyConvertPairs(ctx context.Context,
 	pairs, err := c.service.GetMyConvertPairs(ctx)
 	if err != nil {
 		switch err {
+		case core.ErrorConverterNotAuthorized:
+			return nil, status.Error(codes.PermissionDenied, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -95,6 +101,8 @@ func (c ConverterHandler) SetThresholdConvertPairs(ctx context.Context,
 	err = c.service.SetThresholdConvertPair(ctx, corePair)
 	if err != nil {
 		switch err {
+		case core.ErrorConverterNotAuthorized:
+			return nil, status.Error(codes.PermissionDenied, err.Error())
 		case core.ErrorConverterInvalidConverterPair:
 			return nil, status.Error(codes.Code(
 				converter.AdditionalErrorCode_INVALID_CONVERTER_PAIR), err.Error())
@@ -110,6 +118,8 @@ func (c ConverterHandler) GetMyThresholdConvertPairs(ctx context.Context,
 	threshold, err := c.service.GetMyThresholdsConvertPairs(ctx)
 	if err != nil {
 		switch err {
+		case core.ErrorConverterNotAuthorized:
+			return nil, status.Error(codes.PermissionDenied, err.Error())
 		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -131,6 +141,8 @@ func (c ConverterHandler) GetCurrentExchange(ctx context.Context,
 	exchange, err := c.service.GetCurrentExchange(ctx, corePair)
 	if err != nil {
 		switch err {
+		case core.ErrorConverterNotAuthorized:
+			return nil, status.Error(codes.PermissionDenied, err.Error())
 		case core.ErrorConverterInvalidConverterPair:
 			return nil, status.Error(codes.Code(
 				converter.AdditionalErrorCode_INVALID_CONVERTER_PAIR), err.Error())
