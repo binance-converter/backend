@@ -15,9 +15,10 @@ CREATE TYPE currency_types as enum ('classic', 'crypto');
 CREATE TABLE currencies
 (
     id        serial primary key,
-    type      currency_types    not null,
-    code      varchar(3) unique not null,
-    back_code varchar(255)
+    type      currency_types not null,
+    code      varchar(255)   not null,
+    bank_code varchar(255),
+    UNIQUE (code, type, bank_code)
 );
 
 
