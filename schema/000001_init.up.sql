@@ -26,29 +26,30 @@ CREATE TABLE converter_pairs
 (
     id              serial primary key,
     level           int                                              not null,
-    first_currency  int references currencies (id) on delete cascade not null,
-    second_currency int references currencies (id) on delete cascade not null,
-    third_currency  int references currencies (id) on delete cascade
+    first_currency_id  int references currencies (id) on delete cascade not null,
+    second_currency_id int references currencies (id) on delete cascade not null,
+    third_currency_id  int references currencies (id) on delete cascade,
+    UNIQUE (first_currency_id, second_currency_id, third_currency_id)
 );
 
 CREATE TABLE user_currencies
 (
-    id       serial primary key,
-    user_id  int references users (id) on delete cascade      not null,
-    currency int references currencies (id) on delete cascade not null
+    id          serial primary key,
+    user_id     int references users (id) on delete cascade      not null,
+    currency_id int references currencies (id) on delete cascade not null
 );
 
 CREATE TABLE user_converter_pairs
 (
-    id             serial primary key,
-    user_id        int references users (id) on delete cascade           not null,
-    converter_pair int references converter_pairs (id) on delete cascade not null
+    id                serial primary key,
+    user_id           int references users (id) on delete cascade           not null,
+    converter_pair_id int references converter_pairs (id) on delete cascade not null
 );
 
 CREATE TABLE user_converter_pair_thresholds
 (
-    id             serial primary key,
-    user_id        int references users (id) on delete cascade           not null,
-    converter_pair int references converter_pairs (id) on delete cascade not null,
-    threshold      int                                                   not null
+    id                serial primary key,
+    user_id           int references users (id) on delete cascade           not null,
+    converter_pair_id int references converter_pairs (id) on delete cascade not null,
+    threshold         int                                                   not null
 );
