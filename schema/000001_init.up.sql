@@ -24,8 +24,8 @@ CREATE TABLE currencies
 
 CREATE TABLE converter_pairs
 (
-    id              serial primary key,
-    level           int                                              not null,
+    id                 serial primary key,
+    level              int                                              not null,
     first_currency_id  int references currencies (id) on delete cascade not null,
     second_currency_id int references currencies (id) on delete cascade not null,
     third_currency_id  int references currencies (id) on delete cascade,
@@ -48,8 +48,8 @@ CREATE TABLE user_converter_pairs
 
 CREATE TABLE user_converter_pair_thresholds
 (
-    id                serial primary key,
-    user_id           int references users (id) on delete cascade           not null,
-    converter_pair_id int references converter_pairs (id) on delete cascade not null,
-    threshold         int                                                   not null
+    id                     serial primary key,
+    user_id                int references users (id) on delete cascade                not null,
+    user_converter_pair_id int references user_converter_pairs (id) on delete cascade not null,
+    threshold              int                                                        not null
 );
