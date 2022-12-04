@@ -8,7 +8,7 @@ CREATE TABLE users
     language_code varchar(3)
 );
 
-CREATE INDEX user_chat_id ON users (chat_id)
+CREATE INDEX user_chat_id ON users (chat_id);
 
 CREATE TYPE currency_types as enum ('classic', 'crypto');
 
