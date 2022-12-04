@@ -5,22 +5,22 @@ import (
 	"golang.org/x/net/context"
 )
 
-type currencyUserDb interface {
-	addCurrency(ctx context.Context, userId int, currency core.FullCurrency) error
-	getCurrencies(ctx context.Context, userId int, currencyType *core.CurrencyType) ([]core.
+type CurrencyUserDb interface {
+	AddUserCurrency(ctx context.Context, userId int, currency core.FullCurrency) (int, error)
+	GetUserCurrencies(ctx context.Context, userId int, currencyType *core.CurrencyType) ([]core.
 		FullCurrency, error)
-	deleteCurrency(ctx context.Context, userId int, currency core.CurrencyCode) error
+	DeleteUserCurrency(ctx context.Context, userId int, currency core.CurrencyCode) error
 }
 
-type currencyBinanceApi interface {
-	getAvailableClassicCurrencies(ctx context.Context) ([]core.CurrencyCode, error)
-	getAvailableBanks(ctx context.Context, currency core.CurrencyCode) ([]core.CurrencyBank, error)
-	getAvailableCryptoCurrencies(ctx context.Context) ([]core.CurrencyCode, error)
+type CurrencyBinanceApi interface {
+	GetAvailableClassicCurrencies(ctx context.Context) ([]core.CurrencyCode, error)
+	GetAvailableBanks(ctx context.Context, currency core.CurrencyCode) ([]core.CurrencyBank, error)
+	GetAvailableCryptoCurrencies(ctx context.Context) ([]core.CurrencyCode, error)
 }
 
 type Currency struct {
-	userDb     currencyUserDb
-	binanceApi currencyBinanceApi
+	userDb     CurrencyUserDb
+	binanceApi CurrencyBinanceApi
 }
 
 func (c Currency) GetAvailableCurrencies(ctx context.Context,
@@ -28,13 +28,13 @@ func (c Currency) GetAvailableCurrencies(ctx context.Context,
 
 	switch currencyType {
 	case core.CurrencyTypeClassic:
-		currencies, err = c.binanceApi.getAvailableClassicCurrencies(ctx)
+		currencies, err = c.binanceApi.GetAvailableClassicCurrencies(ctx)
 		if err != nil {
 			return nil, err
 		}
 		break
 	case core.CurrencyTypeCrypto:
-		currencies, err = c.binanceApi.getAvailableCryptoCurrencies(ctx)
+		currencies, err = c.binanceApi.GetAvailableCryptoCurrencies(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -45,7 +45,7 @@ func (c Currency) GetAvailableCurrencies(ctx context.Context,
 
 func (c Currency) GetAvailableBankByCurrency(ctx context.Context,
 	currencyCode core.CurrencyCode) (banks []core.CurrencyBank, err error) {
-	banks, err = c.binanceApi.getAvailableBanks(ctx, currencyCode)
+	banks, err = c.binanceApi.GetAvailableBanks(ctx, currencyCode)
 	return banks, err
 }
 
@@ -54,7 +54,8 @@ func (c Currency) SetCurrency(ctx context.Context, currency core.FullCurrency) e
 	if err != nil {
 		return core.ErrorCurrencyNotAuthorized
 	}
-	err = c.userDb.addCurrency(ctx, userId, currency)
+	// TODO: add validate currency
+	_, err = c.userDb.AddUserCurrency(ctx, userId, currency)
 	return err
 }
 
@@ -64,7 +65,7 @@ func (c Currency) GetMyCurrencies(ctx context.Context,
 	if err != nil {
 		return nil, core.ErrorCurrencyNotAuthorized
 	}
-	currencies, err := c.userDb.getCurrencies(ctx, userId, currencyType)
+	currencies, err := c.userDb.GetUserCurrencies(ctx, userId, currencyType)
 
 	return currencies, err
 }
@@ -75,6 +76,6 @@ func (c Currency) DeleteCurrency(ctx context.Context, currency core.CurrencyCode
 		return core.ErrorCurrencyNotAuthorized
 	}
 
-	err = c.userDb.deleteCurrency(ctx, userId, currency)
+	err = c.userDb.DeleteUserCurrency(ctx, userId, currency)
 	return err
 }
