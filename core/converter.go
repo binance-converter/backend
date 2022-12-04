@@ -14,7 +14,9 @@ type ThresholdConvertPair struct {
 }
 
 var (
-	ErrorConverterEmptyInputArg        = errors.New("empty input arguments")
-	ErrorConverterInvalidConverterPair = errors.New("invalid converter pair")
-	ErrorConverterNotAuthorized        = errors.New("not authorized")
+	ErrorConverterEmptyInputArg              = errors.New("empty input arguments")
+	ErrorConverterInvalidConverterPair       = errors.New("invalid converter pair")
+	ErrorConverterNotAuthorized              = errors.New("not authorized")
+	ErrorConverterConverterPairAlreadyExists = errors.New("converter pair already exists")
+	ErrorConverterConverterPairNotFound      = errors.New("converter pair not found")
 )
