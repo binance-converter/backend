@@ -24,6 +24,7 @@ CREATE TABLE currencies
 
 CREATE TABLE converter_pairs
 (
+    id              serial primary key,
     level           int                                              not null,
     first_currency  int references currencies (id) on delete cascade not null,
     second_currency int references currencies (id) on delete cascade not null,
