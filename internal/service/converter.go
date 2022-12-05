@@ -5,21 +5,22 @@ import (
 	"golang.org/x/net/context"
 )
 
-type converterBinanceApi interface {
+type ConverterBinanceApi interface {
 	getExchange(ctx context.Context, converterPair core.ConverterPair) (core.Exchange, error)
 }
 
-type converterUserDb interface {
-	SetConverterPair(ctx context.Context, userId int, converterPair core.ConverterPair) error
-	GetConverterPairs(ctx context.Context, userId int) ([]core.ConverterPair, error)
+type ConverterUserDb interface {
+	SetUserConverterPair(ctx context.Context, userId int, converterPair core.ConverterPair) (
+		int, error)
+	GetUserConverterPairs(ctx context.Context, userId int) ([]core.ConverterPair, error)
 	SetThresholdConvertPair(ctx context.Context, userId int,
 		threshold core.ThresholdConvertPair) error
 	GetThresholdConvertPair(ctx context.Context, userId int) ([]core.ThresholdConvertPair, error)
 }
 
 type Converter struct {
-	binanceApi converterBinanceApi
-	UserDb     converterUserDb
+	binanceApi ConverterBinanceApi
+	UserDb     ConverterUserDb
 }
 
 func (c *Converter) GetAvailableConverterPairs(ctx context.Context) ([]core.ConverterPair, error) {
@@ -45,8 +46,8 @@ func (c *Converter) SetConvertPair(ctx context.Context, converterPair core.Conve
 	if err != nil {
 		return core.ErrorConverterNotAuthorized
 	}
-
-	return c.UserDb.SetConverterPair(ctx, userId, converterPair)
+	_, err = c.UserDb.SetUserConverterPair(ctx, userId, converterPair)
+	return err
 }
 
 func (c *Converter) GetMyConvertPairs(ctx context.Context) ([]core.ConverterPair, error) {
@@ -54,7 +55,7 @@ func (c *Converter) GetMyConvertPairs(ctx context.Context) ([]core.ConverterPair
 	if err != nil {
 		return nil, core.ErrorConverterNotAuthorized
 	}
-	converterPairs, err := c.UserDb.GetConverterPairs(ctx, userId)
+	converterPairs, err := c.UserDb.GetUserConverterPairs(ctx, userId)
 	if err != nil {
 		return nil, err
 	}

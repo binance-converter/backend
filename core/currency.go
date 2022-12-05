@@ -25,4 +25,6 @@ var (
 	ErrorCurrencyInvalidBankCode     = errors.New("invalid bank code")
 	ErrorCurrencyInternal            = errors.New("internal error")
 	ErrorCurrencyNotAuthorized       = errors.New("not authorized")
+	ErrorCurrencyAlreadyHas          = errors.New("currency already has")
+	ErrorCurrencyNotFound            = errors.New("currency not found")
 )
