@@ -62,3 +62,35 @@ func (u *UserDb) AddUser(ctx context.Context, user core.AddUser) (int, error) {
 
 	return userId, nil
 }
+
+func (u *UserDb) ValidateUser(ctx context.Context, chatId int) (int, error) {
+	db := u.dbDriver
+	tx, ok := u.transactionDB.ExtractTx(ctx)
+	if ok {
+		db = tx
+	}
+
+	query := `	SELECT 
+					id
+                FROM 
+                    users
+                WHERE 
+                    chat_id = $1`
+
+	row := db.QueryRow(ctx, query, chatId)
+
+	var userId int
+	if err := row.Scan(&userId); err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			switch pgErr.Code {
+			case "no rows in result set":
+				return 0, core.ErrorAuthServiceUserNotFound
+			default:
+				return 0, err
+			}
+		} else {
+			return 0, err
+		}
+	}
+	return userId, nil
+}

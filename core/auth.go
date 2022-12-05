@@ -21,5 +21,6 @@ type ServiceSignUpUserByTelegramData struct {
 var (
 	ErrorAuthServiceEmptyInputArg         = errors.New("empty input arguments")
 	ErrorAuthServiceAuthUserAlreadyExists = errors.New("error user already exists")
-	ErrorAuthInternalError                = errors.New("internal error")
+	ErrorAuthServiceInternalError         = errors.New("internal error")
+	ErrorAuthServiceUserNotFound          = errors.New("user not found")
 )
