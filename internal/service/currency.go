@@ -19,8 +19,12 @@ type CurrencyBinanceApi interface {
 }
 
 type Currency struct {
-	userDb     CurrencyUserDb
 	binanceApi CurrencyBinanceApi
+	userDb     CurrencyUserDb
+}
+
+func NewCurrency(binanceApi CurrencyBinanceApi, userDb CurrencyUserDb) *Currency {
+	return &Currency{binanceApi: binanceApi, userDb: userDb}
 }
 
 func (c Currency) GetAvailableCurrencies(ctx context.Context,

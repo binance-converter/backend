@@ -23,6 +23,10 @@ type Converter struct {
 	UserDb     ConverterUserDb
 }
 
+func NewConverter(binanceApi ConverterBinanceApi, userDb ConverterUserDb) *Converter {
+	return &Converter{binanceApi: binanceApi, UserDb: userDb}
+}
+
 func (c *Converter) GetAvailableConverterPairs(ctx context.Context) ([]core.ConverterPair, error) {
 	converterPairs := core.ConverterPairs
 	for _, valF := range core.ConverterPairs {
