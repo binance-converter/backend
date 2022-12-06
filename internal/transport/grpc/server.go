@@ -41,37 +41,36 @@ func NewServer(logger *logrus.Logger, auth auth.AuthServer,
 	converter converter.ConverterServer, currencies currencies.CurrenciesServer,
 	exchangePlot exchange_plot.ExchangePlotServer, authService AuthService) *Server {
 	logrusLogger := logrus.NewEntry(logger)
-	return &Server{
+	server := &Server{
 		Logger:       logger,
 		auth:         auth,
 		converter:    converter,
 		currencies:   currencies,
 		exchangePlot: exchangePlot,
-		srv: grpc.NewServer(
-			grpc.StreamInterceptor(
-				grpc_middleware.ChainStreamServer(
-					grpc_logrus.StreamServerInterceptor(logrusLogger),
-					grpc_recovery.StreamServerInterceptor(),
-				)),
-			grpc.UnaryInterceptor(
-				grpc_middleware.ChainUnaryServer(
-					grpc_logrus.UnaryServerInterceptor(logrusLogger),
-					grpc_recovery.UnaryServerInterceptor(),
-				)),
-		),
-		authService: authService,
+		authService:  authService,
 	}
+
+	server.srv = grpc.NewServer(
+		grpc.StreamInterceptor(
+			grpc_middleware.ChainStreamServer(
+				grpc_logrus.StreamServerInterceptor(logrusLogger),
+				grpc_recovery.StreamServerInterceptor(),
+			)),
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				grpc_logrus.UnaryServerInterceptor(logrusLogger),
+				server.authInterceptor,
+				grpc_recovery.UnaryServerInterceptor(),
+			)),
+	)
+
+	return server
 }
 
-func (s *Server) authInterceptor(
-	ctx context.Context,
-	method string,
+func (s *Server) authInterceptor(ctx context.Context,
 	req interface{},
-	reply interface{},
-	cc *grpc.ClientConn,
-	invoker grpc.UnaryInvoker,
-	opts ...grpc.CallOption,
-) error {
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler) (interface{}, error) {
 	// Logic before invoking the invoker
 	chatIdStr := metadata.ValueFromIncomingContext(ctx, chatIdKey)
 	if chatIdStr != nil && len(chatIdStr) > 0 {
@@ -83,10 +82,9 @@ func (s *Server) authInterceptor(
 			}
 		}
 	}
-	// Calls the invoker to execute RPC
-	err := invoker(ctx, method, req, reply, cc, opts...)
-	// Logic after invoking the invoker
-	return err
+	h, err := handler(ctx, req)
+
+	return h, err
 }
 
 func (s *Server) ListenAndServe(port int) error {
