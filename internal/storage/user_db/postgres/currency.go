@@ -187,6 +187,106 @@ func (u *UserDb) AddCurrencyIfHasNot(ctx context.Context, currency core.FullCurr
 	return id, nil
 }
 
+func (u *UserDb) GetAvailableClassicCurrencies(ctx context.Context) ([]core.CurrencyCode, error) {
+	db := u.dbDriver
+	tx, ok := u.transactionDB.ExtractTx(ctx)
+	if ok {
+		db = tx
+	}
+
+	query := `	SELECT DISTINCT
+                	(code)
+                FROM
+                    currencies
+                WHERE
+                    type = 'classic'`
+
+	rows, err := db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var currencies []core.CurrencyCode
+
+	for rows.Next() {
+		var currency core.CurrencyCode
+		err = rows.Scan(&currency)
+		if err != nil {
+			return nil, err
+		}
+		currencies = append(currencies, currency)
+	}
+	return currencies, nil
+}
+func (u *UserDb) GetAvailableBanks(ctx context.Context, currency core.CurrencyCode) ([]core.
+	CurrencyBank, error) {
+	db := u.dbDriver
+	tx, ok := u.transactionDB.ExtractTx(ctx)
+	if ok {
+		db = tx
+	}
+
+	query := `	SELECT DISTINCT
+                	(bank_code)
+                FROM
+                    currencies
+                WHERE
+                    type = 'classic' AND
+                    code = $1`
+
+	rows, err := db.Query(ctx, query, currency)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var currencies []core.CurrencyBank
+
+	for rows.Next() {
+		var currency core.CurrencyBank
+		err = rows.Scan(&currency)
+		if err != nil {
+			return nil, err
+		}
+		currencies = append(currencies, currency)
+	}
+	return currencies, nil
+}
+
+func (u *UserDb) GetAvailableCryptoCurrencies(ctx context.Context) ([]core.CurrencyCode, error) {
+	db := u.dbDriver
+	tx, ok := u.transactionDB.ExtractTx(ctx)
+	if ok {
+		db = tx
+	}
+
+	query := `	SELECT
+                	(code)
+                FROM
+                    currencies
+                WHERE
+                    type = 'crypto'`
+
+	rows, err := db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var currencies []core.CurrencyCode
+
+	for rows.Next() {
+		var currency core.CurrencyCode
+		err = rows.Scan(&currency)
+		if err != nil {
+			return nil, err
+		}
+		currencies = append(currencies, currency)
+	}
+	return currencies, nil
+}
+
 func (u *UserDb) AddUserCurrency(ctx context.Context, userId int,
 	currency core.FullCurrency) (int, error) {
 	//TODO: move to service

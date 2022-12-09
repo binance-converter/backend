@@ -10,21 +10,13 @@ type CurrencyUserDb interface {
 	GetUserCurrencies(ctx context.Context, userId int, currencyType *core.CurrencyType) ([]core.
 		FullCurrency, error)
 	DeleteUserCurrency(ctx context.Context, userId int, currency core.CurrencyCode) error
-}
-
-type CurrencyBinanceApi interface {
 	GetAvailableClassicCurrencies(ctx context.Context) ([]core.CurrencyCode, error)
 	GetAvailableBanks(ctx context.Context, currency core.CurrencyCode) ([]core.CurrencyBank, error)
 	GetAvailableCryptoCurrencies(ctx context.Context) ([]core.CurrencyCode, error)
 }
 
 type Currency struct {
-	binanceApi CurrencyBinanceApi
-	userDb     CurrencyUserDb
-}
-
-func NewCurrency(binanceApi CurrencyBinanceApi, userDb CurrencyUserDb) *Currency {
-	return &Currency{binanceApi: binanceApi, userDb: userDb}
+	userDb CurrencyUserDb
 }
 
 func (c Currency) GetAvailableCurrencies(ctx context.Context,
@@ -32,13 +24,13 @@ func (c Currency) GetAvailableCurrencies(ctx context.Context,
 
 	switch currencyType {
 	case core.CurrencyTypeClassic:
-		currencies, err = c.binanceApi.GetAvailableClassicCurrencies(ctx)
+		currencies, err = c.userDb.GetAvailableClassicCurrencies(ctx)
 		if err != nil {
 			return nil, err
 		}
 		break
 	case core.CurrencyTypeCrypto:
-		currencies, err = c.binanceApi.GetAvailableCryptoCurrencies(ctx)
+		currencies, err = c.userDb.GetAvailableCryptoCurrencies(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +41,7 @@ func (c Currency) GetAvailableCurrencies(ctx context.Context,
 
 func (c Currency) GetAvailableBankByCurrency(ctx context.Context,
 	currencyCode core.CurrencyCode) (banks []core.CurrencyBank, err error) {
-	banks, err = c.binanceApi.GetAvailableBanks(ctx, currencyCode)
+	banks, err = c.userDb.GetAvailableBanks(ctx, currencyCode)
 	return banks, err
 }
 
