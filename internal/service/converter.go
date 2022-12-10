@@ -6,7 +6,7 @@ import (
 )
 
 type ConverterBinanceApi interface {
-	getExchange(ctx context.Context, converterPair core.ConverterPair) (core.Exchange, error)
+	GetExchange(ctx context.Context, converterPair core.ConverterPair) (core.Exchange, error)
 }
 
 type ConverterUserDb interface {
@@ -92,7 +92,7 @@ func (c *Converter) GetMyThresholdsConvertPairs(ctx context.Context) ([]core.Thr
 
 func (c *Converter) GetCurrentExchange(ctx context.Context,
 	converterPair core.ConverterPair) (core.Exchange, error) {
-	exchange, err := c.binanceApi.getExchange(ctx, converterPair)
+	exchange, err := c.binanceApi.GetExchange(ctx, converterPair)
 	if err != nil {
 		return core.Exchange(0), err
 	}

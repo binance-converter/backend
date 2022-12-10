@@ -14,7 +14,7 @@ func NewBinanceApi() *BinanceApi {
 	return &BinanceApi{}
 }
 
-func (b *BinanceApi) getExchange(ctx context.Context,
+func (b *BinanceApi) GetExchange(ctx context.Context,
 	converterPair core.ConverterPair) (core.Exchange, error) {
 	if len(converterPair.Currencies) != 2 {
 		return 0, core.ErrorBinanceApiInvalidConverterPair
