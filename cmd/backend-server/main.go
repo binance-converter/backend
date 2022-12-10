@@ -5,6 +5,7 @@ import (
 	userDbPostgres "github.com/binance-converter/backend/internal/storage/user_db/postgres"
 	"github.com/binance-converter/backend/internal/transport/grpc"
 	"github.com/binance-converter/backend/internal/transport/grpc/handler"
+	"github.com/binance-converter/backend/pkg/binance_api"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
@@ -27,9 +28,11 @@ func main() {
 
 	userDb := userDbPostgres.NewUserDB(postgresDb, transaction)
 
+	bApi := binance_api.NewBinanceApi()
+
 	authService := service.NewAuth(userDb)
-	converterService := service.NewConverter(nil, userDb)
-	currencyService := service.NewCurrency(nil, userDb)
+	converterService := service.NewConverter(bApi, userDb)
+	currencyService := service.NewCurrency(userDb)
 
 	auth := handler.NewAuthHandler(authService)
 	converter := handler.NewConverterHandler(converterService)
