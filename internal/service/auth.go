@@ -7,6 +7,7 @@ import (
 
 type AuthDB interface {
 	AddUser(ctx context.Context, user core.AddUser) (int, error)
+	ValidateUser(ctx context.Context, chatId int) (int, error)
 }
 
 type Auth struct {
@@ -24,6 +25,11 @@ func (a *Auth) SignUpUserByTelegram(ctx context.Context,
 	addUser := convertServiceSignUpUserByTelegramDataToAddUser(data)
 	_, err := a.db.AddUser(ctx, addUser)
 	return err
+}
+
+func (a *Auth) ValidateUserByChatId(ctx context.Context, chatId int) (int, error) {
+	userId, err := a.db.ValidateUser(ctx, chatId)
+	return userId, err
 }
 
 func convertServiceSignUpUserByTelegramDataToAddUser(data core.
