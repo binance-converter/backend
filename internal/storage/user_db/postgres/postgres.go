@@ -18,7 +18,7 @@ const (
 
 type Config struct {
 	Host     string `json:"host"`
-	Port     string `json:"port"`
+	Port     int    `json:"port"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 	DBName   string `json:"db_name"`
@@ -31,7 +31,7 @@ func NewPostgresDB(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
 		"file":     "postgres.go",
 		"function": "NewPostgresDB",
 	}
-	dns := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port,
+	dns := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port,
 		cfg.DBName)
 
 	var pool *pgxpool.Pool
@@ -61,6 +61,11 @@ func NewPostgresDB(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
 		}).Error("error ping db")
 		return nil, err
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"base": logBase,
+		"name": cfg.DBName,
+	}).Info("database inited")
 
 	return pool, nil
 
