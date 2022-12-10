@@ -19,6 +19,10 @@ type Currency struct {
 	userDb CurrencyUserDb
 }
 
+func NewCurrency(userDb CurrencyUserDb) *Currency {
+	return &Currency{userDb: userDb}
+}
+
 func (c Currency) GetAvailableCurrencies(ctx context.Context,
 	currencyType core.CurrencyType) (currencies []core.CurrencyCode, err error) {
 
