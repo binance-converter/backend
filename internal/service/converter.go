@@ -14,6 +14,7 @@ type ConverterUserDb interface {
 	SetUserConverterPair(ctx context.Context, userId int, converterPair core.ConverterPair) (
 		int, error)
 	GetUserConverterPairs(ctx context.Context, userId int) ([]core.ConverterPair, error)
+	GetConverterPairs(ctx context.Context) ([]core.ConverterPair, error)
 	SetThresholdConvertPair(ctx context.Context, userId int,
 		threshold core.ThresholdConvertPair) error
 	GetThresholdConvertPair(ctx context.Context, userId int) ([]core.ThresholdConvertPair, error)
