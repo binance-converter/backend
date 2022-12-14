@@ -80,10 +80,14 @@ func (u *UserDb) CheckConverterPair(ctx context.Context, converterPair core.Conv
                 WHERE
                     level = $1 AND
                     first_currency_id = $2 AND
-                    second_currency_id = $3 AND
-                    third_currency_id = $4`
+                    second_currency_id = $3`
+
+	if len(converterPair.Currencies) == 3 {
+		query += "AND third_currency_id = $4"
+	}
 
 	var additionalArgs []interface{}
+	additionalArgs = append(additionalArgs, len(converterPair.Currencies))
 	for _, currency := range converterPair.Currencies {
 		currencyId, err := u.CheckCurrency(ctx, currency)
 		if err != nil {
@@ -95,10 +99,8 @@ func (u *UserDb) CheckConverterPair(ctx context.Context, converterPair core.Conv
 		}
 		additionalArgs = append(additionalArgs, currencyId)
 	}
-	if len(converterPair.Currencies) == 2 {
-		additionalArgs = append(additionalArgs, nil)
-	}
-	row := db.QueryRow(ctx, query, additionalArgs)
+
+	row := db.QueryRow(ctx, query, additionalArgs...)
 	var converterPairId int
 	if err := row.Scan(&converterPairId); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
