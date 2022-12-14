@@ -94,11 +94,48 @@ func (c *Converter) GetMyThresholdsConvertPairs(ctx context.Context) ([]core.Thr
 
 func (c *Converter) GetCurrentExchange(ctx context.Context,
 	converterPair core.ConverterPair) (core.Exchange, error) {
-	exchange, err := c.binanceApi.GetExchange(ctx, converterPair)
-	if err != nil {
-		return core.Exchange(0), err
+
+	var resExchange core.Exchange
+
+	if len(converterPair.Currencies) == 2 {
+		exchange, err := c.binanceApi.GetExchange(ctx, converterPair)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"converterPair": converterPair,
+				"error":         err.Error(),
+			}).Error("error get exchange")
+			return core.Exchange(0), err
+		}
+		resExchange = exchange
+	} else if len(converterPair.Currencies) == 3 {
+		firstConverterPair := core.ConverterPair{
+			Currencies: converterPair.Currencies[:2],
+		}
+		secondConverterPair := core.ConverterPair{
+			Currencies: converterPair.Currencies[1:],
+		}
+		firstExchange, err := c.binanceApi.GetExchange(ctx, firstConverterPair)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"converterPair": converterPair,
+				"error":         err.Error(),
+			}).Error("error get exchange")
+			return core.Exchange(0), err
+		}
+		secondExchange, err := c.binanceApi.GetExchange(ctx, secondConverterPair)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"converterPair": converterPair,
+				"error":         err.Error(),
+			}).Error("error get exchange")
+			return core.Exchange(0), err
+		}
+		resExchange = firstExchange / secondExchange
+	} else {
+		return 0, core.ErrorConverterInvalidConverterPair
 	}
-	return exchange, nil
+
+	return resExchange, nil
 }
 
 func (c *Converter) makeSecondLevelPair(first core.ConverterPair,
