@@ -316,7 +316,7 @@ func convertCoreFullCurrenciesToProto(coreCurrencies []core.FullCurrency) (proto
 		if err != nil {
 			return nil, err
 		}
-		currencies.FullCurrencies = append(currencies.FullCurrencies, protoCurrency)
+		protoCurrencies.FullCurrencies = append(protoCurrencies.FullCurrencies, protoCurrency)
 	}
-	return currencies, nil
+	return protoCurrencies, nil
 }
