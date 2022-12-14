@@ -138,7 +138,7 @@ func (u *UserDb) GetCurrency(ctx context.Context, currencyId int) (*core.FullCur
 		db = tx
 	}
 	query := `	SELECT 
-                	(type, code, bank_code)
+                	type, code, bank_code
                 FROM 
                     currencies
                 WHERE
@@ -149,7 +149,7 @@ func (u *UserDb) GetCurrency(ctx context.Context, currencyId int) (*core.FullCur
 	var currency core.FullCurrency
 	var currencyType string
 
-	if err := row.Scan(&currencyType, &currency.CurrencyCode, &currency.CurrencyType); err != nil {
+	if err := row.Scan(&currencyType, &currency.CurrencyCode, &currency.BankCode); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			switch pgErr.Code {
 			case "no rows in result set":

@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/binance-converter/backend-api/api/converter"
 	"github.com/binance-converter/backend/core"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,6 +33,9 @@ func (c ConverterHandler) GetAvailableConverterPairs(ctx context.Context,
 
 	pairs, err := c.service.GetAvailableConverterPairs(ctx)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("error get available converter pairs")
 		switch err {
 		case core.ErrorConverterNotAuthorized:
 			return nil, status.Error(codes.PermissionDenied, err.Error())
@@ -42,6 +46,10 @@ func (c ConverterHandler) GetAvailableConverterPairs(ctx context.Context,
 
 	protoPairs, err := convertCoreConverterPairsToProto(pairs)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+			"pairs": pairs,
+		}).Error("error convert core converter pairs to proto")
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -52,11 +60,19 @@ func (c ConverterHandler) SetConvertPair(ctx context.Context,
 	pair *converter.ConverterPair) (*emptypb.Empty, error) {
 	corePair, err := convertProtoConverterPairToCore(pair)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+			"pair":  pair,
+		}).Error("error convert proto converter pairs to core")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	err = c.service.SetConvertPair(ctx, corePair)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error":    err.Error(),
+			"corePair": corePair,
+		}).Error("error set converter pair")
 		switch err {
 		case core.ErrorConverterNotAuthorized:
 			return nil, status.Error(codes.PermissionDenied, err.Error())
@@ -140,6 +156,10 @@ func (c ConverterHandler) GetCurrentExchange(ctx context.Context,
 
 	exchange, err := c.service.GetCurrentExchange(ctx, corePair)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"corePair": corePair,
+			"error":    err.Error(),
+		}).Error("error get current exchange")
 		switch err {
 		case core.ErrorConverterNotAuthorized:
 			return nil, status.Error(codes.PermissionDenied, err.Error())
@@ -152,6 +172,9 @@ func (c ConverterHandler) GetCurrentExchange(ctx context.Context,
 	}
 	return convertCoreExchangeToProto(exchange), nil
 }
+
+// ------------------------------------------------------------------------------------------------
+// helper functions
 
 func convertCoreConverterPairToProto(corePair core.ConverterPair) (*converter.ConverterPair,
 	error) {

@@ -21,7 +21,7 @@ type UserDb struct {
 	transactionDB transactionDBUserDB
 }
 
-func newUserDB(dbDriver dbDriverUserDB, transactionDB transactionDBUserDB) *UserDb {
+func NewUserDB(dbDriver dbDriverUserDB, transactionDB transactionDBUserDB) *UserDb {
 	return &UserDb{
 		dbDriver:      dbDriver,
 		transactionDB: transactionDB,

@@ -1,7 +1,7 @@
 CREATE TABLE users
 (
     id            serial primary key,
-    chat_id       int,
+    chat_id       bigint unique,
     user_name     varchar(255),
     first_name    varchar(255) not null,
     last_name     varchar(255) not null,
@@ -36,14 +36,16 @@ CREATE TABLE user_currencies
 (
     id          serial primary key,
     user_id     int references users (id) on delete cascade      not null,
-    currency_id int references currencies (id) on delete cascade not null
+    currency_id int references currencies (id) on delete cascade not null,
+    UNIQUE (user_id, currency_id)
 );
 
 CREATE TABLE user_converter_pairs
 (
     id                serial primary key,
     user_id           int references users (id) on delete cascade           not null,
-    converter_pair_id int references converter_pairs (id) on delete cascade not null
+    converter_pair_id int references converter_pairs (id) on delete cascade not null,
+    UNIQUE (user_id, converter_pair_id)
 );
 
 CREATE TABLE user_converter_pair_thresholds
@@ -51,5 +53,6 @@ CREATE TABLE user_converter_pair_thresholds
     id                     serial primary key,
     user_id                int references users (id) on delete cascade                not null,
     user_converter_pair_id int references user_converter_pairs (id) on delete cascade not null,
-    threshold              int                                                        not null
+    threshold              int                                                        not null,
+    UNIQUE (user_id, user_converter_pair_id, threshold)
 );

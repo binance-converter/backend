@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/binance-converter/backend-api/api/auth"
 	"github.com/binance-converter/backend/core"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -28,11 +29,18 @@ func (a *AuthHandler) SignUpUserByTelegram(ctx context.Context,
 
 	coreRequest, err := convertProtoSignUpUserByTelegramToCore(request)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("error convert proto SignUpUserByTelegramRequest to core")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	err = a.service.SignUpUserByTelegram(ctx, coreRequest)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error":     err.Error(),
+			"user data": coreRequest,
+		}).Error("error signup user")
 		switch err {
 		case core.ErrorAuthServiceAuthUserAlreadyExists:
 			return nil, status.Error(codes.AlreadyExists, "fuck you")

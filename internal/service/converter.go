@@ -2,17 +2,19 @@ package service
 
 import (
 	"github.com/binance-converter/backend/core"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
 type ConverterBinanceApi interface {
-	getExchange(ctx context.Context, converterPair core.ConverterPair) (core.Exchange, error)
+	GetExchange(ctx context.Context, converterPair core.ConverterPair) (core.Exchange, error)
 }
 
 type ConverterUserDb interface {
 	SetUserConverterPair(ctx context.Context, userId int, converterPair core.ConverterPair) (
 		int, error)
 	GetUserConverterPairs(ctx context.Context, userId int) ([]core.ConverterPair, error)
+	GetConverterPairs(ctx context.Context) ([]core.ConverterPair, error)
 	SetThresholdConvertPair(ctx context.Context, userId int,
 		threshold core.ThresholdConvertPair) error
 	GetThresholdConvertPair(ctx context.Context, userId int) ([]core.ThresholdConvertPair, error)
@@ -23,20 +25,21 @@ type Converter struct {
 	UserDb     ConverterUserDb
 }
 
-func (c *Converter) GetAvailableConverterPairs(ctx context.Context) ([]core.ConverterPair, error) {
-	converterPairs := core.ConverterPairs
-	for _, valF := range core.ConverterPairs {
-		for _, valS := range core.ConverterPairs {
-			converterPair, err := c.makeSecondLevelPair(valF, valS)
-			if err == nil {
-				converterPairs = append(converterPairs, converterPair)
-			}
+func NewConverter(binanceApi ConverterBinanceApi, userDb ConverterUserDb) *Converter {
+	return &Converter{binanceApi: binanceApi, UserDb: userDb}
+}
 
-			converterPair, err = c.makeSecondLevelPair(valS, valF)
-			if err == nil {
-				converterPairs = append(converterPairs, converterPair)
-			}
-		}
+func (c *Converter) GetAvailableConverterPairs(ctx context.Context) ([]core.ConverterPair, error) {
+	_, err := core.ContextGetUserId(ctx)
+	if err != nil {
+		return nil, core.ErrorConverterNotAuthorized
+	}
+	converterPairs, err := c.UserDb.GetConverterPairs(ctx)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("error getting converter pairs from database")
+		return nil, err
 	}
 	return converterPairs, nil
 }
@@ -44,6 +47,9 @@ func (c *Converter) GetAvailableConverterPairs(ctx context.Context) ([]core.Conv
 func (c *Converter) SetConvertPair(ctx context.Context, converterPair core.ConverterPair) error {
 	userId, err := core.ContextGetUserId(ctx)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("error get userId from context")
 		return core.ErrorConverterNotAuthorized
 	}
 	_, err = c.UserDb.SetUserConverterPair(ctx, userId, converterPair)
@@ -88,11 +94,48 @@ func (c *Converter) GetMyThresholdsConvertPairs(ctx context.Context) ([]core.Thr
 
 func (c *Converter) GetCurrentExchange(ctx context.Context,
 	converterPair core.ConverterPair) (core.Exchange, error) {
-	exchange, err := c.binanceApi.getExchange(ctx, converterPair)
-	if err != nil {
-		return core.Exchange(0), err
+
+	var resExchange core.Exchange
+
+	if len(converterPair.Currencies) == 2 {
+		exchange, err := c.binanceApi.GetExchange(ctx, converterPair)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"converterPair": converterPair,
+				"error":         err.Error(),
+			}).Error("error get exchange")
+			return core.Exchange(0), err
+		}
+		resExchange = exchange
+	} else if len(converterPair.Currencies) == 3 {
+		firstConverterPair := core.ConverterPair{
+			Currencies: converterPair.Currencies[:2],
+		}
+		secondConverterPair := core.ConverterPair{
+			Currencies: converterPair.Currencies[1:],
+		}
+		firstExchange, err := c.binanceApi.GetExchange(ctx, firstConverterPair)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"converterPair": converterPair,
+				"error":         err.Error(),
+			}).Error("error get exchange")
+			return core.Exchange(0), err
+		}
+		secondExchange, err := c.binanceApi.GetExchange(ctx, secondConverterPair)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"converterPair": converterPair,
+				"error":         err.Error(),
+			}).Error("error get exchange")
+			return core.Exchange(0), err
+		}
+		resExchange = firstExchange / secondExchange
+	} else {
+		return 0, core.ErrorConverterInvalidConverterPair
 	}
-	return exchange, nil
+
+	return resExchange, nil
 }
 
 func (c *Converter) makeSecondLevelPair(first core.ConverterPair,
