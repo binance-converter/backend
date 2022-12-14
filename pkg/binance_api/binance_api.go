@@ -29,14 +29,14 @@ func (b *BinanceApi) GetExchange(ctx context.Context,
 	var payTypes []string
 
 	if converterPair.Currencies[0].CurrencyType == core.CurrencyTypeCrypto {
-		assets = string(converterPair.Currencies[1].CurrencyCode)
+		assets = string(converterPair.Currencies[0].CurrencyCode)
 		payTypes = []string{string(converterPair.Currencies[1].BankCode)}
-		fiat = string(converterPair.Currencies[0].CurrencyType)
+		fiat = string(converterPair.Currencies[1].CurrencyCode)
 		tradeType = binanceP2PApi.OperationSell
 	} else {
-		assets = string(converterPair.Currencies[0].CurrencyCode)
+		assets = string(converterPair.Currencies[1].CurrencyCode)
 		payTypes = []string{string(converterPair.Currencies[0].BankCode)}
-		fiat = string(converterPair.Currencies[1].CurrencyType)
+		fiat = string(converterPair.Currencies[0].CurrencyCode)
 		tradeType = binanceP2PApi.OperationBuy
 	}
 
