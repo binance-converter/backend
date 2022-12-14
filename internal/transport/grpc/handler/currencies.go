@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/binance-converter/backend-api/api/currencies"
 	"github.com/binance-converter/backend/core"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,13 +33,21 @@ func NewCurrenciesHandler(service currenciesService) *CurrenciesHandler {
 
 func (c *CurrenciesHandler) GetAvailableCurrencies(ctx context.Context,
 	currencyType *currencies.CurrencyType) (*currencies.CurrencyCodes, error) {
-	coreCurrencyCode, err := convertProtoCurrencyTypeToCore(currencyType)
+	coreCurrencyType, err := convertProtoCurrencyTypeToCore(currencyType)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"currency_type": currencyType.GetType(),
+			"error":         err.Error(),
+		}).Error("error convert proto currency type to core")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	coreCurrencies, err := c.service.GetAvailableCurrencies(ctx, coreCurrencyCode)
+	coreCurrencies, err := c.service.GetAvailableCurrencies(ctx, coreCurrencyType)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"currency_type": coreCurrencyType,
+			"error":         err.Error(),
+		}).Error("error get available currencies")
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyCode:
 			return nil, status.Error(codes.Code(
@@ -56,11 +65,19 @@ func (c *CurrenciesHandler) GetAvailableBankByCurrency(ctx context.Context,
 
 	coreCode, err := convertProtoCurrencyCodeToCore(code)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"currency_code": code.CurrencyCode,
+			"error":         err.Error(),
+		}).Error("error convert proto currency type to core")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	banks, err := c.service.GetAvailableBankByCurrency(ctx, coreCode)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"currency_code": coreCode,
+			"error":         err.Error(),
+		}).Error("error get available banks")
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyCode:
 			return nil, status.Error(codes.Code(
@@ -76,12 +93,20 @@ func (c *CurrenciesHandler) SetCurrency(ctx context.Context,
 	currency *currencies.FullCurrency) (*emptypb.Empty, error) {
 	coreCurrency, err := convertProtoFullCurrencyToCore(currency)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"currency": currency,
+			"error":    err.Error(),
+		}).Error("error convert proto full currency to core")
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	err = c.service.SetCurrency(ctx, coreCurrency)
 
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"currency": coreCurrency,
+			"error":    err.Error(),
+		}).Error("error set currency")
 		switch err {
 		case core.ErrorCurrencyInvalidCurrencyType:
 			return nil, status.Error(codes.Code(
@@ -200,12 +225,14 @@ func convertProtoCurrencyCodeToCore(protoCurrencyCode *currencies.CurrencyCode) 
 
 func convertCoreCurrencyCodeToProto(coreCurrencyCode core.CurrencyCode) (
 	currencyCode *currencies.CurrencyCode) {
+	currencyCode = &currencies.CurrencyCode{}
 	currencyCode.CurrencyCode = string(coreCurrencyCode)
 	return currencyCode
 }
 
 func convertCoreCurrencyCodesToProto(coreCurrencies []core.CurrencyCode) (currencyCodes *currencies.
 	CurrencyCodes) {
+	currencyCodes = &currencies.CurrencyCodes{}
 	for _, currency := range coreCurrencies {
 		currencyCodes.CurrencyCodes = append(currencyCodes.CurrencyCodes,
 			convertCoreCurrencyCodeToProto(currency))
@@ -215,6 +242,7 @@ func convertCoreCurrencyCodesToProto(coreCurrencies []core.CurrencyCode) (curren
 
 func convertCoreCurrencyBankToProto(coreCurrencyBank core.CurrencyBank) (CurrencyBank *currencies.
 	BankName) {
+	CurrencyBank = &currencies.BankName{}
 	CurrencyBank.BankName = string(coreCurrencyBank)
 	return CurrencyBank
 }
@@ -229,6 +257,7 @@ func convertProtoCurrencyBankToCore(protoCurrencyBank *currencies.
 
 func convertCoreCurrencyBanksToProto(coreCurrencyBanks []core.CurrencyBank) (
 	CurrencyBank *currencies.BankNames) {
+	CurrencyBank = &currencies.BankNames{}
 	for _, coreCurrencyBank := range coreCurrencyBanks {
 		bankName := convertCoreCurrencyBankToProto(coreCurrencyBank)
 		CurrencyBank.BankNames = append(CurrencyBank.BankNames,
@@ -279,8 +308,9 @@ func convertCoreFullCurrencyToProto(coreCurrency core.FullCurrency) (*currencies
 	}, nil
 }
 
-func convertCoreFullCurrenciesToProto(coreCurrencies []core.FullCurrency) (currencies *currencies.
+func convertCoreFullCurrenciesToProto(coreCurrencies []core.FullCurrency) (protoCurrencies *currencies.
 	FullCurrencies, err error) {
+	protoCurrencies = &currencies.FullCurrencies{}
 	for _, currency := range coreCurrencies {
 		protoCurrency, err := convertCoreFullCurrencyToProto(currency)
 		if err != nil {

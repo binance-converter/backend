@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/binance-converter/backend/core"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -24,6 +25,12 @@ func (a *Auth) SignUpUserByTelegram(ctx context.Context,
 	data core.ServiceSignUpUserByTelegramData) error {
 	addUser := convertServiceSignUpUserByTelegramDataToAddUser(data)
 	_, err := a.db.AddUser(ctx, addUser)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error":     err,
+			"user data": addUser,
+		}).Error("error add user to database")
+	}
 	return err
 }
 

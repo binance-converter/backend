@@ -3,6 +3,7 @@ package userDbPostgres
 import (
 	"github.com/binance-converter/backend/core"
 	"github.com/jackc/pgconn"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -28,34 +29,32 @@ func (u *UserDb) AddUser(ctx context.Context, user core.AddUser) (int, error) {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			switch pgErr.Code {
 			case "23505":
-				//logrus.WithFields(logrus.Fields{
-				//	"base":    logBase,
-				//	"email":   user.Email,
-				//	"massage": pgErr.Message,
-				//	"where":   pgErr.Where,
-				//	"detail":  pgErr.Detail,
-				//	"code":    pgErr.Code,
-				//	"query":   query,
-				//}).Error("user already has")
+				logrus.WithFields(logrus.Fields{
+					"massage": pgErr.Message,
+					"where":   pgErr.Where,
+					"detail":  pgErr.Detail,
+					"code":    pgErr.Code,
+					"query":   query,
+					"user":    user,
+				}).Error("user already has")
 				return 0, core.ErrorAuthServiceAuthUserAlreadyExists
 			default:
-				//logrus.WithFields(logrus.Fields{
-				//	"base":    logBase,
-				//	"email":   user.Email,
-				//	"massage": pgErr.Message,
-				//	"where":   pgErr.Where,
-				//	"detail":  pgErr.Detail,
-				//	"code":    pgErr.Code,
-				//	"query":   query,
-				//}).Error("error add user to postgres")
+				logrus.WithFields(logrus.Fields{
+					"massage": pgErr.Message,
+					"where":   pgErr.Where,
+					"detail":  pgErr.Detail,
+					"code":    pgErr.Code,
+					"query":   query,
+					"user":    user,
+				}).Error("error add user to postgres")
 				return 0, err
 			}
 		} else {
-			//logrus.WithFields(logrus.Fields{
-			//	"base":  logBase,
-			//	"query": query,
-			//	"error": err,
-			//}).Error("error add user to postgres")
+			logrus.WithFields(logrus.Fields{
+				"query": query,
+				"error": err,
+				"user":  user,
+			}).Error("error add user to postgres")
 			return 0, err
 		}
 	}

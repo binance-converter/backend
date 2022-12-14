@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/binance-converter/backend/core"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -48,6 +49,9 @@ func (c *Converter) GetAvailableConverterPairs(ctx context.Context) ([]core.Conv
 func (c *Converter) SetConvertPair(ctx context.Context, converterPair core.ConverterPair) error {
 	userId, err := core.ContextGetUserId(ctx)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("error get userId from context")
 		return core.ErrorConverterNotAuthorized
 	}
 	_, err = c.UserDb.SetUserConverterPair(ctx, userId, converterPair)

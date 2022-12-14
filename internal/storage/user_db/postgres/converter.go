@@ -3,6 +3,7 @@ package userDbPostgres
 import (
 	"github.com/binance-converter/backend/core"
 	"github.com/jackc/pgconn"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -86,6 +87,10 @@ func (u *UserDb) CheckConverterPair(ctx context.Context, converterPair core.Conv
 	for _, currency := range converterPair.Currencies {
 		currencyId, err := u.CheckCurrency(ctx, currency)
 		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error":    err,
+				"currency": currency,
+			}).Error("error check currency")
 			return 0, core.ErrorConverterInvalidConverterPair
 		}
 		additionalArgs = append(additionalArgs, currencyId)
@@ -97,6 +102,10 @@ func (u *UserDb) CheckConverterPair(ctx context.Context, converterPair core.Conv
 	var converterPairId int
 	if err := row.Scan(&converterPairId); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
+			logrus.WithFields(logrus.Fields{
+				"error":          pgErr,
+				"additionalArgs": additionalArgs,
+			}).Error("error scan converter pair id")
 			switch pgErr.Code {
 			case "no rows in result set":
 				return 0, core.ErrorConverterConverterPairNotFound
@@ -104,6 +113,10 @@ func (u *UserDb) CheckConverterPair(ctx context.Context, converterPair core.Conv
 				return 0, err
 			}
 		} else {
+			logrus.WithFields(logrus.Fields{
+				"error":          err.Error(),
+				"additionalArgs": additionalArgs,
+			}).Error("error scan converter pair id")
 			return 0, err
 		}
 	}
@@ -139,6 +152,10 @@ func (u *UserDb) SetUserConverterPair(ctx context.Context, userId int,
 	//TODO: move to service
 	converterPairId, err := u.AddConverterPairIfHasNot(ctx, converterPair)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"converterPair": converterPair,
+			"error":         err.Error(),
+		}).Error("error check converter pair")
 		return 0, err
 	}
 
@@ -161,6 +178,12 @@ func (u *UserDb) SetUserConverterPair(ctx context.Context, userId int,
 	var userConverterPairId int
 	if err := row.Scan(&userConverterPairId); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
+			logrus.WithFields(logrus.Fields{
+				"query":           query,
+				"userId":          userId,
+				"converterPairId": converterPairId,
+				"pgErr":           pgErr,
+			}).Error("error check converter pair")
 			switch pgErr.Code {
 			case "23505":
 				return 0, core.ErrorConverterConverterPairAlreadyExists
@@ -168,6 +191,12 @@ func (u *UserDb) SetUserConverterPair(ctx context.Context, userId int,
 				return 0, err
 			}
 		} else {
+			logrus.WithFields(logrus.Fields{
+				"query":           query,
+				"userId":          userId,
+				"converterPairId": converterPairId,
+				"err":             err.Error(),
+			}).Error("error check converter pair")
 			return 0, err
 		}
 	}
@@ -199,10 +228,22 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 	rows, err := db.Query(ctx, query, userId)
 	if err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
+			logrus.WithFields(logrus.Fields{
+				"query":  query,
+				"userId": userId,
+				"pgErr":  pgErr,
+			}).Error("error run query when get user converter pair")
 			switch pgErr.Code {
 			default:
 				return nil, core.ErrorConverterConverterPairNotFound
 			}
+		} else {
+			logrus.WithFields(logrus.Fields{
+				"query":  query,
+				"userId": userId,
+				"error":  err,
+			}).Error("error run query when get user converter pair")
+			return nil, err
 		}
 	}
 
@@ -212,21 +253,43 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 		var level, firstId, secondId, thirdId int
 		if err := rows.Scan(&level, &firstId, &secondId, &thirdId); err != nil {
 			if pgErr, ok := err.(*pgconn.PgError); ok {
+				logrus.WithFields(logrus.Fields{
+					"query":  query,
+					"userId": userId,
+					"pgErr":  pgErr,
+				}).Error("error scan row when get user converter pair")
 				switch pgErr.Code {
 				default:
 					return nil, err
 				}
+			} else {
+				logrus.WithFields(logrus.Fields{
+					"query":  query,
+					"userId": userId,
+					"error":  err,
+				}).Error("error scan row when get user converter pair")
+				return nil, err
 			}
 		}
 		var converterPair core.ConverterPair
 		firstCurrency, err := u.GetCurrency(ctx, firstId)
 		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"userId":  userId,
+				"error":   err,
+				"firstId": firstId,
+			}).Error("error get first currency when get user converter pair")
 			return nil, err
 		}
 		converterPair.Currencies = append(converterPair.Currencies, *firstCurrency)
 
 		secondCurrency, err := u.GetCurrency(ctx, secondId)
 		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"userId":   userId,
+				"error":    err,
+				"secondId": secondId,
+			}).Error("error get second currency when get user converter pair")
 			return nil, err
 		}
 		converterPair.Currencies = append(converterPair.Currencies, *secondCurrency)
@@ -234,6 +297,11 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 		if level == 3 {
 			thirdCurrency, err := u.GetCurrency(ctx, thirdId)
 			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"userId":  userId,
+					"error":   err,
+					"thirdId": thirdId,
+				}).Error("error get third currency when get user converter pair")
 				return nil, err
 			}
 			converterPair.Currencies = append(converterPair.Currencies, *thirdCurrency)
