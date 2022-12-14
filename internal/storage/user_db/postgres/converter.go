@@ -246,7 +246,7 @@ func (u *UserDb) AddConverterPairIfHasNot(ctx context.Context,
 func (u *UserDb) SetUserConverterPair(ctx context.Context, userId int,
 	converterPair core.ConverterPair) (int, error) {
 	//TODO: move to service
-	converterPairId, err := u.AddConverterPairIfHasNot(ctx, converterPair)
+	converterPairId, err := u.CheckConverterPair(ctx, converterPair)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"converterPair": converterPair,
