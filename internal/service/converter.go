@@ -30,19 +30,16 @@ func NewConverter(binanceApi ConverterBinanceApi, userDb ConverterUserDb) *Conve
 }
 
 func (c *Converter) GetAvailableConverterPairs(ctx context.Context) ([]core.ConverterPair, error) {
-	converterPairs := core.ConverterPairs
-	for _, valF := range core.ConverterPairs {
-		for _, valS := range core.ConverterPairs {
-			converterPair, err := c.makeSecondLevelPair(valF, valS)
-			if err == nil {
-				converterPairs = append(converterPairs, converterPair)
-			}
-
-			converterPair, err = c.makeSecondLevelPair(valS, valF)
-			if err == nil {
-				converterPairs = append(converterPairs, converterPair)
-			}
-		}
+	_, err := core.ContextGetUserId(ctx)
+	if err != nil {
+		return nil, core.ErrorConverterNotAuthorized
+	}
+	converterPairs, err := c.UserDb.GetConverterPairs(ctx)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("error getting converter pairs from database")
+		return nil, err
 	}
 	return converterPairs, nil
 }
