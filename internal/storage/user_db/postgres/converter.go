@@ -309,7 +309,7 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 	}
 
 	query := `	SELECT
-	    			(level, first_currency_id, second_currency_id, third_currency_id)
+	    			level, first_currency_id, second_currency_id, third_currency_id
 				FROM
 				    converter_pairs
                 WHERE
@@ -346,7 +346,7 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 	var converterPairs []core.ConverterPair
 
 	for rows.Next() {
-		var level, firstId, secondId, thirdId int
+		var level, firstId, secondId, thirdId *int
 		if err := rows.Scan(&level, &firstId, &secondId, &thirdId); err != nil {
 			if pgErr, ok := err.(*pgconn.PgError); ok {
 				logrus.WithFields(logrus.Fields{
@@ -368,7 +368,7 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 			}
 		}
 		var converterPair core.ConverterPair
-		firstCurrency, err := u.GetCurrency(ctx, firstId)
+		firstCurrency, err := u.GetCurrency(ctx, *firstId)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"userId":  userId,
@@ -379,7 +379,7 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 		}
 		converterPair.Currencies = append(converterPair.Currencies, *firstCurrency)
 
-		secondCurrency, err := u.GetCurrency(ctx, secondId)
+		secondCurrency, err := u.GetCurrency(ctx, *secondId)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"userId":   userId,
@@ -390,8 +390,8 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 		}
 		converterPair.Currencies = append(converterPair.Currencies, *secondCurrency)
 
-		if level == 3 {
-			thirdCurrency, err := u.GetCurrency(ctx, thirdId)
+		if *level == 3 {
+			thirdCurrency, err := u.GetCurrency(ctx, *thirdId)
 			if err != nil {
 				logrus.WithFields(logrus.Fields{
 					"userId":  userId,
