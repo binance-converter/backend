@@ -402,6 +402,7 @@ func (u *UserDb) GetUserConverterPairs(ctx context.Context, userId int) ([]core.
 			}
 			converterPair.Currencies = append(converterPair.Currencies, *thirdCurrency)
 		}
+		converterPairs = append(converterPairs, converterPair)
 	}
 	return converterPairs, nil
 }
