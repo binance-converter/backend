@@ -125,6 +125,100 @@ func (u *UserDb) CheckConverterPair(ctx context.Context, converterPair core.Conv
 	return converterPairId, nil
 }
 
+func (u *UserDb) GetConverterPairs(ctx context.Context) ([]core.ConverterPair, error) {
+	db := u.dbDriver
+	tx, ok := u.transactionDB.ExtractTx(ctx)
+	if ok {
+		db = tx
+	}
+
+	query := `	SELECT
+	    			level, first_currency_id, second_currency_id, third_currency_id
+				FROM
+				    converter_pairs`
+
+	rows, err := db.Query(ctx, query)
+	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			logrus.WithFields(logrus.Fields{
+				"error": pgErr,
+				"query": query,
+			}).Error("error run query on database")
+			switch pgErr.Code {
+			default:
+				return nil, core.ErrorConverterConverterPairNotFound
+			}
+		} else {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+				"query": query,
+			}).Error("error run query on database")
+			return nil, err
+		}
+	}
+
+	var converterPairs []core.ConverterPair
+
+	for rows.Next() {
+		var level, firstId, secondId, thirdId *int
+		if err := rows.Scan(&level, &firstId, &secondId, &thirdId); err != nil {
+			if pgErr, ok := err.(*pgconn.PgError); ok {
+				logrus.WithFields(logrus.Fields{
+					"error": pgErr,
+					"query": query,
+				}).Error("error scan row")
+				switch pgErr.Code {
+				default:
+					return nil, err
+				}
+			} else {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+					"query": query,
+				}).Error("error scan row")
+				return nil, err
+			}
+		}
+
+		var converterPair core.ConverterPair
+		firstCurrency, err := u.GetCurrency(ctx, *firstId)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+				"id":    firstId,
+			}).Error("error get first currency")
+			return nil, err
+		}
+		converterPair.Currencies = append(converterPair.Currencies, *firstCurrency)
+
+		secondCurrency, err := u.GetCurrency(ctx, *secondId)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+				"id":    secondId,
+			}).Error("error get second currency")
+			return nil, err
+		}
+		converterPair.Currencies = append(converterPair.Currencies, *secondCurrency)
+
+		if *level == 3 {
+			thirdCurrency, err := u.GetCurrency(ctx, *thirdId)
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+					"id":    thirdId,
+				}).Error("error get third currency")
+				return nil, err
+			}
+			converterPair.Currencies = append(converterPair.Currencies, *thirdCurrency)
+		}
+
+		converterPairs = append(converterPairs, converterPair)
+	}
+
+	return converterPairs, nil
+}
+
 func (u *UserDb) AddConverterPairIfHasNot(ctx context.Context,
 	converterPair core.ConverterPair) (int, error) {
 	id, err := u.CheckConverterPair(ctx, converterPair)
