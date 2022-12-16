@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/binance-converter/backend/internal/service"
 	userDbPostgres "github.com/binance-converter/backend/internal/storage/user_db/postgres"
 	"github.com/binance-converter/backend/internal/transport/grpc"
@@ -14,14 +15,14 @@ import (
 
 type appConfig struct {
 	Grpc struct {
-		Port *int
+		Port int `env:"GRPC_PORT"`
 	}
 	PostgresUserDb struct {
-		Host     *string
-		Port     *int
-		Username string
+		Host     string `env:"POSTGRES_USER_DB_HOST"`
+		Port     int    `env:"POSTGRES_USER_DB_PORT"`
+		Username string `env:"POSTGRES_USER_DB_USER_NAME"`
 		Password string `env:"POSTGRES_USER_DB_PASSWORD"`
-		DBName   *string
+		DBName   string `env:"POSTGRES_USER_DB_NAME"`
 	}
 }
 
@@ -30,7 +31,7 @@ func main() {
 
 	cfg, err := initConfig()
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Warning(err)
 	}
 
 	logger := logrus.New()
@@ -38,11 +39,11 @@ func main() {
 	ctx := context.Background()
 
 	userDbConfig := userDbPostgres.Config{
-		Host:     *cfg.PostgresUserDb.Host,
-		Port:     *cfg.PostgresUserDb.Port,
+		Host:     cfg.PostgresUserDb.Host,
+		Port:     cfg.PostgresUserDb.Port,
 		Username: cfg.PostgresUserDb.Username,
 		Password: cfg.PostgresUserDb.Password,
-		DBName:   *cfg.PostgresUserDb.DBName,
+		DBName:   cfg.PostgresUserDb.DBName,
 	}
 
 	postgresDb, err := userDbPostgres.NewPostgresDB(ctx, userDbConfig)
@@ -69,7 +70,7 @@ func main() {
 
 	grpcServer := grpc.NewServer(logger, auth, converter, currencies, exchangePlot, authService)
 
-	err = grpcServer.ListenAndServe(*cfg.Grpc.Port)
+	err = grpcServer.ListenAndServe(cfg.Grpc.Port)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -91,7 +92,9 @@ func initConfig() (appConfig, error) {
 	envFeeder := feeder.Env{}
 	dotEnvFeeder := feeder.DotEnv{Path: ".env"}
 
-	err := config.New().AddFeeder(yamlFeeder, envFeeder, dotEnvFeeder).AddStruct(&cfg).Feed()
+	err := config.New().AddFeeder(envFeeder, dotEnvFeeder, yamlFeeder).AddStruct(&cfg).Feed()
+
+	fmt.Println(cfg)
 
 	return cfg, err
 }
