@@ -11,7 +11,7 @@ WORKDIR /binance-converter-backend
 
 # build go app
 RUN go mod download
-
+RUN go mod tidy
 RUN go build -o binance-converter-backend ./cmd/backend-server/main.go
 
 FROM alpine:latest
