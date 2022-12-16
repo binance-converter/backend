@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  binance-converter-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - GRPC_PORT=$BINANCE_CONVERTER_BACKEND_GRPC_PORT
+      - POSTGRES_USER_DB_HOST=database
+      - POSTGRES_USER_DB_PORT=5432
+      - POSTGRES_USER_DB_USER_NAME=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME
+      - POSTGRES_USER_DB_PASSWORD=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD
+      - POSTGRES_USER_DB_NAME=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
+    restart: always
+    ports:
+      - ${BINANCE_CONVERTER_BACKEND_GRPC_PORT}
+    networks:
+      binance-converter:
+        aliases:
+          - backend
+    links:
+      - db
+    depends_on:
+      - migrations
+      - db
+
+  migrations:
+    image: migrate/migrate
+    networks:
+      - binance-converter
+    volumes:
+      - ./migrations:/migrations
+    environment:
+      - USER_DB_USER_NAME=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME
+      - USER_DB_PASSWORD=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD
+      - USER_DB_NAME=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
+    command: [ "-path", "/migrations", "-database",
+               "postgres://$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME:$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD@database:5432/$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME?sslmode
+               =disable", "up" ]
+    links:
+      - db
+    depends_on:
+      - db
+
+
+  db:
+    image: postgres:14.6
+    networks:
+      binance-converter:
+        aliases:
+          - database
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME
+      - POSTGRES_PASSWORD=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD
+      - POSTGRES_DB=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432"
+    healthcheck:
+      test: pg_isready -U $BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME -d $BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres_data:
+
+
+networks:
+  binance-converter:
+    name: binance-converter
