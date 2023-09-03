@@ -20,12 +20,6 @@ jobs:
       - name: get deps
         run: go mod download
 
-      - name: fetch numary control
-        uses: actions/download-artifact@v3
-        with:
-          name: docs-dist
-          path: docs/
-
       - name: Run test
         run: go test -v -coverpkg=./... -coverprofile=coverage.out -covermode=atomic ./...
 
