@@ -17,8 +17,6 @@ services:
 
   migrations:
     image: migrate/migrate
-    networks:
-      - binance-converter
     volumes:
       - ./migrations:/migrations
     environment:
