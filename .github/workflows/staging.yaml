@@ -74,6 +74,6 @@ jobs:
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME=${{ vars.POSTGRES_USER_DB_NAME }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD=${{ secrets.POSTGRES_USER_DB_PASSWORD }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME=${{ vars.POSTGRES_USER_DB_USER_NAME }}
-            docker-compose -f docker-compose.yml -p binance-converter up -d --remove-orphans
+            docker-compose -f docker-compose.yaml -p binance-converter up -d --remove-orphans
             cd ../../
             rm -r binance-converter
