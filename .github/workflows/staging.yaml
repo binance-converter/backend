@@ -64,6 +64,7 @@ jobs:
           username: ${{ vars.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
+            mkdir binance-converter
             cd binance-converter
             git clone https://github.com/binance-converter/backend.git
             cd backend
@@ -75,3 +76,5 @@ jobs:
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD=${{ secrets.POSTGRES_USER_DB_PASSWORD }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME=${{ vars.POSTGRES_USER_DB_USER_NAME }}
             docker-compose up
+            cd ../../
+            rm -r binance-converter
