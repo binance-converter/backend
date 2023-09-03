@@ -68,13 +68,12 @@ jobs:
             cd binance-converter
             git clone https://github.com/binance-converter/backend.git
             cd backend
-            docker-compose down &
             export BINANCE_CONVERTER_BACKEND_GRPC_PORT=${{ vars.GRPC_PORT }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_HOST=${{ vars.POSTGRES_USER_DB_HOST }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PORT=${{ vars.POSTGRES_USER_DB_PORT }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME=${{ vars.POSTGRES_USER_DB_NAME }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD=${{ secrets.POSTGRES_USER_DB_PASSWORD }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME=${{ vars.POSTGRES_USER_DB_USER_NAME }}
-            docker-compose up
+            docker-compose -f docker-compose.yml -p binance-converter up -d --remove-orphans
             cd ../../
             rm -r binance-converter
