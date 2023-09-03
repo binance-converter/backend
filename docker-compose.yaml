@@ -3,6 +3,7 @@ version: '3.8'
 services:
   binance-converter-backend:
     image: emil11078/binance-converter-backend:latest
+    command: ./binance-converter-backend
     environment:
       - GRPC_PORT=$BINANCE_CONVERTER_BACKEND_GRPC_PORT
       - POSTGRES_USER_DB_HOST=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_HOST
@@ -11,7 +12,6 @@ services:
       - POSTGRES_USER_DB_PASSWORD=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD
       - POSTGRES_USER_DB_NAME=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
     restart: always
-    command: /root/binance-converter-backend
     networks:
       binance-converter:
         aliases:

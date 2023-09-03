@@ -69,6 +69,7 @@ jobs:
             git clone https://github.com/binance-converter/backend.git
             cd backend
             git checkout feature/setting-deploy-to-server
+            docker-compose down
             export BINANCE_CONVERTER_BACKEND_GRPC_PORT=${{ vars.GRPC_PORT }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_HOST=${{ vars.POSTGRES_USER_DB_HOST }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PORT=${{ vars.POSTGRES_USER_DB_PORT }}
