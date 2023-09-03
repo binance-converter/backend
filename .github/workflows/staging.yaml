@@ -10,8 +10,6 @@ jobs:
   run-tests:
     name: 'Run Tests'
     runs-on: ubuntu-latest
-    needs:
-      - docs
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -35,7 +33,6 @@ jobs:
     name: 'Build and push docker image'
     runs-on: ubuntu-latest
     needs:
-      - docs
       - run-tests
     steps:
       - name: Set up QEMU
