@@ -6,10 +6,11 @@ on:
 
   workflow_dispatch:
 
+
 jobs:
   run-tests:
     name: 'Run Tests'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -25,7 +26,7 @@ jobs:
 
   build-image:
     name: 'Build and push docker image'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - run-tests
     steps:
@@ -53,7 +54,7 @@ jobs:
 
   deploy:
     name: 'Deploy to server'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - build-image
     steps:
