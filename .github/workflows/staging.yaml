@@ -38,7 +38,7 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: $DOCKERHUB_USERNAME
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - uses: actions/checkout@v3
@@ -66,10 +66,10 @@ jobs:
           script: |
             cd thing-repository
             docker-compose down
-            export BINANCE_CONVERTER_BACKEND_GRPC_PORT=$GRPC_PORT
-            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_HOST=$POSTGRES_USER_DB_HOST
-            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PORT=$POSTGRES_USER_DB_PORT
-            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME=$POSTGRES_USER_DB_NAME
+            export BINANCE_CONVERTER_BACKEND_GRPC_PORT=${{ vars.GRPC_PORT }}
+            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_HOST=${{ vars.POSTGRES_USER_DB_HOST }}
+            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PORT=${{ vars.POSTGRES_USER_DB_PORT }}
+            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME=${{ vars.POSTGRES_USER_DB_NAME }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD=${{ secrets.POSTGRES_USER_DB_PASSWORD }}
-            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME=$POSTGRES_USER_DB_USER_NAME
+            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME=${{ vars.POSTGRES_USER_DB_USER_NAME }}
             docker-compose up
