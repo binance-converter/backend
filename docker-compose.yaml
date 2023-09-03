@@ -41,32 +41,6 @@ services:
     depends_on:
       - db
 
-
-  db:
-    image: postgres:14.6
-    networks:
-      binance-converter:
-        aliases:
-          - database
-    restart: on-failure
-    environment:
-      - POSTGRES_USER=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME
-      - POSTGRES_PASSWORD=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD
-      - POSTGRES_DB=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - "5432"
-    healthcheck:
-      test: pg_isready -U $BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME -d $BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
-      interval: 30s
-      timeout: 3s
-      retries: 3
-
-volumes:
-  postgres_data:
-
-
 networks:
   binance-converter:
     name: binance-converter
