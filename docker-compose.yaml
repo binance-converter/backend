@@ -11,6 +11,7 @@ services:
       - POSTGRES_USER_DB_PASSWORD=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD
       - POSTGRES_USER_DB_NAME=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME
     restart: always
+    command: /root/binance-converter-backend
     networks:
       binance-converter:
         aliases:

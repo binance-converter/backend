@@ -17,9 +17,6 @@ RUN go build -o binance-converter-backend ./cmd/backend-server/main.go
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 
-
 WORKDIR /root/
 
 COPY --from=0 /binance-converter-backend/binance-converter-backend .
-
-CMD ["./binance-converter-backend"]
