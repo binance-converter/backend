@@ -20,8 +20,8 @@ WORKDIR /root/
 
 COPY --from=0 /binance-converter-backend/binance-converter-backend .
 
-COPY entrypoint.sh .
-
-RUN chmod 777 /root/entrypoint.sh
-
-ENTRYPOINT ["/root/entrypoint.sh"]
+#COPY entrypoint.sh .
+#
+#RUN chmod 777 /root/entrypoint.sh
+#
+#ENTRYPOINT ["/root/entrypoint.sh"]

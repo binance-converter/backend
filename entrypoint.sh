@@ -1,4 +1,3 @@
 #!/bin/
 
-echo "start"
 exec "$@"
