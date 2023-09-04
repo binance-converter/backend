@@ -1,2 +1,4 @@
-#!/bin/sh
+#!/bin/
+
 echo "start"
+exec "$@"
