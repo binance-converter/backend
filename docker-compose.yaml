@@ -5,6 +5,8 @@ services:
     image: emil11078/binance-converter-backend:latest
     restart: always
     command: ./binance-converter-backend
+    networks:
+      - db_main
     ports:
       - "7935:7935"
     environment:
@@ -28,3 +30,10 @@ services:
     command: [ "-path", "/migrations", "-database",
                "postgres://$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME:$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD@database:5432/$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_NAME?sslmode
                =disable", "up" ]
+
+
+
+networks:
+  db_main:
+    name: db_main
+    external: true
