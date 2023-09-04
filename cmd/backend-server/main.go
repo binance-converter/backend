@@ -52,6 +52,7 @@ func main() {
 			"error": err,
 		}).Fatal("error connect to postgres database")
 	}
+	logrus.Info("db connected")
 
 	transaction := userDbPostgres.NewTransaction(postgresDb)
 

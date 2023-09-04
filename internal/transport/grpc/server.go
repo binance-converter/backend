@@ -99,6 +99,8 @@ func (s *Server) ListenAndServe(port int) error {
 	currencies.RegisterCurrenciesServer(s.srv, s.currencies)
 	exchange_plot.RegisterExchangePlotServer(s.srv, s.exchangePlot)
 
+	logrus.Info("start server")
+
 	if err := s.srv.Serve(lis); err != nil {
 		return err
 	}
