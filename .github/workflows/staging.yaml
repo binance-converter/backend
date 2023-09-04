@@ -71,7 +71,7 @@ jobs:
             cd backend
             git checkout feature/setting-deploy-to-server
             export BINANCE_CONVERTER_BACKEND_GRPC_PORT=${{ vars.GRPC_PORT }}
-            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_HOST=${{ vars.POSTGRES_USER_DB_HOST }}
+            export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_HOST=${{ vars.POSTGRES_USER_DB_PORT }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PORT=${{ vars.POSTGRES_USER_DB_PORT }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME=${{ vars.POSTGRES_USER_DB_NAME }}
             export BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD=${{ secrets.POSTGRES_USER_DB_PASSWORD }}
