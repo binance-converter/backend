@@ -99,7 +99,7 @@ func initConfig() (appConfig, error) {
 		"dbPort":   cfg.PostgresUserDb.Port,
 		"dbUser":   cfg.PostgresUserDb.Username,
 		"dbName":   cfg.PostgresUserDb.DBName,
-	})
+	}).Info("app configs")
 
 	return cfg, err
 }
