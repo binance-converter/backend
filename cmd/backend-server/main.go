@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/binance-converter/backend/internal/service"
 	userDbPostgres "github.com/binance-converter/backend/internal/storage/user_db/postgres"
 	"github.com/binance-converter/backend/internal/transport/grpc"
@@ -94,7 +93,13 @@ func initConfig() (appConfig, error) {
 
 	err := config.New().AddFeeder(envFeeder, dotEnvFeeder, yamlFeeder).AddStruct(&cfg).Feed()
 
-	fmt.Println(cfg)
+	logrus.WithFields(logrus.Fields{
+		"grpcPort": cfg.Grpc.Port,
+		"dbHost":   cfg.PostgresUserDb.Host,
+		"dbPort":   cfg.PostgresUserDb.Port,
+		"dbUser":   cfg.PostgresUserDb.Username,
+		"dbName":   cfg.PostgresUserDb.DBName,
+	})
 
 	return cfg, err
 }
