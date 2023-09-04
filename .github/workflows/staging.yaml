@@ -50,7 +50,7 @@ jobs:
           push: true
           tags: emil11078/binance-converter-backend:latest
           platforms:
-            linux/arm/v7
+            linux/amd64
 
   deploy:
     name: 'Deploy to server'
