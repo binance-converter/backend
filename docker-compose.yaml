@@ -23,6 +23,8 @@ services:
     image: migrate/migrate
     volumes:
       - ./migrations:/migrations
+    networks:
+      - db_main
     environment:
       - USER_DB_USER_NAME=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_USER_NAME
       - USER_DB_PASSWORD=$BINANCE_CONVERTER_BACKEND_POSTGRES_USER_DB_PASSWORD
