@@ -19,6 +19,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 COPY --from=0 /binance-converter-backend/binance-converter-backend .
+COPY config/.env .
 
 #COPY entrypoint.sh .
 #
