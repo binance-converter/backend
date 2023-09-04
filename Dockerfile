@@ -20,6 +20,7 @@ WORKDIR /root/
 
 COPY --from=0 /binance-converter-backend/binance-converter-backend .
 COPY config/.env .
+COPY config/config.yaml .
 
 #COPY entrypoint.sh .
 #
